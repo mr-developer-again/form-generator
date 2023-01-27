@@ -16,8 +16,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
 	    "sources/main.cpp"
-		"sources/mainwindow.cpp"
-		"headers/mainwindow.h"
+		"sources/formgenerator.cpp"
+		"headers/formgenerator.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
