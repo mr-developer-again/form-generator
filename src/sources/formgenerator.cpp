@@ -1,9 +1,8 @@
 #include <headers/formgenerator.h>
 
 Arad::GeneratingForm::FormGenerator::FormGenerator(QString const& filePath, QWidget *parent)
-    : QMainWindow(parent)
-
 {
+    this->_widget = new QWidget;
     Arad::GeneratingForm::FormGenerator::setFilePath(filePath);
 }
 
@@ -20,9 +19,9 @@ void Arad::GeneratingForm::FormGenerator::setFilePath(QString const& filePath)
 QString Arad::GeneratingForm::FormGenerator::getFilePath() const noexcept
 {   return this->_filePath; }
 
-
 Arad::GeneratingForm::FormGenerator::~FormGenerator()
 {
     delete this->_jsonParser;
+    delete this->_widget;
 }
 

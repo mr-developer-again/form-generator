@@ -3,7 +3,6 @@
 
 #include <headers/jsonparser.h>
 
-#include <QMainWindow>
 #include <QWidget>
 #include <QString>
 
@@ -12,10 +11,8 @@ namespace Arad
     namespace GeneratingForm
     {
 
-        class FormGenerator : public QMainWindow
+        class FormGenerator
         {
-            Q_OBJECT
-
         public:
             explicit FormGenerator(QString const& filePath, QWidget *parent = nullptr);
             virtual ~FormGenerator();
@@ -26,6 +23,7 @@ namespace Arad
             void setFilePath(QString const& filePath);
             QString getFilePath() const noexcept;
 
+            QWidget* _widget = nullptr;
             Arad::Parser::JsonParser *_jsonParser = nullptr;
 
         private:

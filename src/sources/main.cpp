@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 
     Arad::GeneratingForm::FormGenerator *formGenerator = new Arad::GeneratingForm::AradStyleFormGenerator(filePath);
     formGenerator->setupForm();
-    formGenerator->show();
 
     return a.exec();
 }

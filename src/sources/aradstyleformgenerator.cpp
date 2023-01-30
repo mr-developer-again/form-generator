@@ -7,7 +7,7 @@
 Arad::GeneratingForm::AradStyleFormGenerator::AradStyleFormGenerator(QString const& filePath, QWidget* parent)
     : Arad::GeneratingForm::FormGenerator(filePath, parent)
 {
-    this->setWindowTitle("Generated Form");
+    this->_widget->setWindowTitle("Generated Form");
 }
 
 void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
@@ -17,9 +17,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
     QVector<QMap<QString, QString>> tempVector = this->_jsonParser->parseJson();
 
-    this->_vBoxLayout = new QVBoxLayout(this);
+    this->_vBoxLayout = new QVBoxLayout(this->_widget);
 
-    this->_splitterLine = new QFrame(this);
+    this->_splitterLine = new QFrame(this->_widget);
     this->_splitterLine->setFrameShape(QFrame::HLine);
     this->_splitterLine->setFrameShadow(QFrame::Sunken);
 
@@ -35,7 +35,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
             if (it.key().toLower() == "name")
             {
-                this->_label = new QLabel(this);
+                this->_label = new QLabel(this->_widget);
                 this->_label->setText(it.value().toLower() + ":");
                 this->_labelContainer.push_back(this->_label);
 
@@ -49,7 +49,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
             {
                 if (it.value().toLower() == "string")
                 {
-                    this->_lineEdit = new QLineEdit(this);
+                    this->_lineEdit = new QLineEdit(this->_widget);
                     this->_lineEdit->setPlaceholderText(defaultValue);
                     this->_lineEditContainer.push_back(this->_lineEdit);
 
@@ -65,7 +65,11 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
         this->_hBoxLayoutContainer.push_back(this->_hBoxLayout);
         this->_vBoxLayout->addLayout(this->_hBoxLayout);
         this->_vBoxLayout->addWidget(this->_splitterLine);
+
+        defaultValue = "";
     }
+
+    this->_widget->show();
 }
 
 
@@ -73,6 +77,9 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
 {
     delete this->_label;
     delete this->_lineEdit;
+    delete this->_splitterLine;
+    delete this->_hBoxLayout;
+    delete this->_vBoxLayout;
 
     for (auto &label : this->_labelContainer)
         delete label;
