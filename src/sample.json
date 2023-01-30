@@ -1,0 +1,14 @@
+[
+	{
+		"name": "first name",
+		"value": "first name",
+		"type": "string",
+		"readonly": "false"
+	},
+	{
+		"name": "last name",
+		"value": "last name",
+		"type": "string",
+		"readonly": "true"
+	}
+]

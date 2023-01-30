@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QWidget>
+#include <QString>
 
 namespace Arad
 {
@@ -16,11 +17,19 @@ namespace Arad
             Q_OBJECT
 
         public:
-            explicit FormGenerator(QWidget *parent = nullptr);
+            explicit FormGenerator(QString const& filePath, QWidget *parent = nullptr);
             virtual ~FormGenerator();
 
-        private:
+            virtual void setupForm() = 0;
+
+        protected:
+            void setFilePath(QString const& filePath);
+            QString getFilePath() const noexcept;
+
             Arad::Parser::JsonParser *_jsonParser = nullptr;
+
+        private:
+            QString _filePath = "";
         };
 
     } // GeneratingForm namespace

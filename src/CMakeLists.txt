@@ -22,6 +22,8 @@ set(PROJECT_SOURCES
 		"headers/jsonparser.h"
 		"sources/aradstylejsonparser.cpp"
 		"headers/aradstylejsonparser.h"
+		"sources/aradstyleformgenerator.cpp"
+		"headers/aradstyleformgenerator.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

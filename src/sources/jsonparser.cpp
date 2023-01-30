@@ -12,7 +12,7 @@ Arad::Parser::JsonParser::JsonParser(QString const& filePath, QStringList const&
       _validKeys(validKeys)
 { /* constructor body */ }
 
-bool Arad::Parser::JsonParser::fileCanBeOpened(QString const& filePath) const
+bool Arad::Parser::JsonParser::fileCanBeOpened(QString const& filePath) noexcept
 {
     QFile file(filePath);
 
