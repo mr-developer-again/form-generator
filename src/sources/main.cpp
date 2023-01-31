@@ -1,7 +1,9 @@
 #include <headers/formgenerator.h>
 #include <headers/aradstyleformgenerator.h>
 
+#include <stdexcept>
 #include <QApplication>
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {

@@ -10,5 +10,29 @@
 		"value": "last name",
 		"type": "string",
 		"readonly": "true"
+	},
+	{
+		"name": "age",
+		"value": "19",
+		"type": "number_ui",
+		"readonly": "false"
+	},
+	{
+		"name": "height",
+		"value": "-1.0",
+		"type": "number_f",
+		"readonly": "false"
+	},
+	{
+		"name": "some integer",
+		"value": "-5",
+		"type": "number_i",
+		"readonly": "true"
+	},
+	{
+		"name": "some double",
+		"value": "3.14",
+		"type": "number_uf",
+		"readonly": "false"
 	}
 ]

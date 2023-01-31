@@ -27,9 +27,18 @@ some notes about valid values for the written keys:
 
 							NOTE: valid types:
 									- bool (checkbox representative)
+
+											NOTE: for bool type, default value can be "checked-true" or "checked-false"
+												  and if you don't determine the default value, by default it will be set
+												  "checked-true" value .
+
 									- string (lineEdit representative)
 									- string list (combobox representative)
-									- number (spinbox or lineEdit represetative);
+									- number_i (simple spin box for integer numbers)
+									- number_ui (simple spin box for non-negative integer numbers)
+									- number_f (double spin box for double numbers)
+									- number_uf (double spin box for non-negative double numbers)
 									- file (lineEdit and fileBrowser representative)
+
 
 	4) readonly key -> the value for this key is true or false (if it's false, you can't change value of this object)

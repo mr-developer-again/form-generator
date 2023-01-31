@@ -9,6 +9,8 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFrame>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 
 namespace Arad
 {
@@ -37,6 +39,12 @@ namespace Arad
             QVector<QLineEdit*> _lineEditContainer;
 
             QFrame *_splitterLine = nullptr;
+
+            QSpinBox *_regularSpinBox = nullptr;
+            QVector<QSpinBox*> _regularSpinBoxContainer;
+
+            QDoubleSpinBox *_doubleSpinBox = nullptr;
+            QVector<QDoubleSpinBox*> _doubleSpinBoxContainer;
 
         };
 

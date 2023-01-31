@@ -21,12 +21,13 @@ namespace Arad
             virtual QVector<QMap<QString, QString>> parseJson() = 0;
 
             static bool fileCanBeOpened(QString const& filePath) noexcept;
-        protected:
-            void setFilePath(QString const& filePath);
-            QString getFilePath() const;
 
             void setValidKeys(QStringList const& validKeys);
             QStringList getValidKeys() const;
+
+        protected:
+            void setFilePath(QString const& filePath);
+            QString getFilePath() const;
 
         private:
             QString _filePath;

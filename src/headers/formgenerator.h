@@ -20,11 +20,14 @@ namespace Arad
             virtual void setupForm() = 0;
 
         protected:
-            void setFilePath(QString const& filePath);
-            QString getFilePath() const noexcept;
+            virtual void setFilePath(QString const& filePath);
+            virtual QString getFilePath() const noexcept;
 
             QWidget* _widget = nullptr;
             Arad::Parser::JsonParser *_jsonParser = nullptr;
+
+            virtual bool validInteger(QString const& inputString) const noexcept;
+            virtual bool validDouble(QString const& inputString) const noexcept;
 
         private:
             QString _filePath = "";
