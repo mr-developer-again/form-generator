@@ -15,6 +15,7 @@
 #include <QPushButton>
 #include <QFileSystemModel>
 #include <QTreeView>
+#include <QDialog>
 
 namespace Arad
 {
@@ -22,11 +23,26 @@ namespace Arad
     namespace GeneratingForm
     {
 
-        class AradStyleFormGenerator : public QPushButton, public Arad::GeneratingForm::FormGenerator
+        class AradStyleFormGenerator : public Arad::GeneratingForm::FormGenerator
         {
             Q_OBJECT
 
+            struct BrowsingInFileSystem
+            {
+            public:
+                QDialog *dialog = new QDialog;
+                QFileSystemModel *fileSystemModel = nullptr;
+                QTreeView *treeView = nullptr;
+                QHBoxLayout *hBoxLayout = new QHBoxLayout;
+                QVBoxLayout *vBoxLayout = new QVBoxLayout(dialog);
+                QPushButton *selectPushButton = new QPushButton(dialog);
+                QSpacerItem *spacerItem;
+                QString pathOfSelectedFile = "";
+            };
+
         public:
+
+
             explicit AradStyleFormGenerator(QString const& filePath, QWidget* parent = nullptr);
             virtual ~AradStyleFormGenerator();
 
@@ -58,12 +74,12 @@ namespace Arad
             QPushButton *_pushButton = nullptr;
             QVector<QPushButton*> _pushButtonContainer;
 
-            QFileSystemModel *_fileSystemModel = nullptr;
-
-            QTreeView *_treeView = nullptr;
+            BrowsingInFileSystem *_browsingInFileSystem = nullptr;
 
         private slots:
             void slot_browsePushButtonClicked();
+            void slot_treeViewDoubleClicked(QModelIndex index);
+            void slot_selectPushButtonClicked();
 
         };
 

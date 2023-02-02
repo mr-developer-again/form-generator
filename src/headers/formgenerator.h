@@ -5,13 +5,14 @@
 
 #include <QWidget>
 #include <QString>
+#include <QMainWindow>
 
 namespace Arad
 {
     namespace GeneratingForm
     {
 
-        class FormGenerator
+        class FormGenerator : public QMainWindow
         {
         public:
             explicit FormGenerator(QString const& filePath, QWidget *parent = nullptr);

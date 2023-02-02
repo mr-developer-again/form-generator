@@ -11,10 +11,6 @@
 #include <limits>
 #include <stdexcept>
 
-//////////// TESTING //////////////
-#include <QTextStream>
-/////////// END OF TESTING ////////////
-
 Arad::GeneratingForm::AradStyleFormGenerator::AradStyleFormGenerator(QString const& filePath, QWidget* parent)
     : Arad::GeneratingForm::FormGenerator(filePath, parent)
 {
@@ -236,8 +232,7 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
     delete this->_vBoxLayout;
     delete this->_regularSpinBox;
     delete this->_doubleSpinBox;
-    delete this->_fileSystemModel;
-    delete this->_treeView;
+    delete this->_browsingInFileSystem;
 
     for (auto &label : this->_labelContainer)
         delete label;
@@ -255,36 +250,64 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
         delete doubleSpinBox;
 }
 
-
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_browsePushButtonClicked()
 {
-    QDialog *dialog = new QDialog(this);
-    QHBoxLayout *hBoxLayout = new QHBoxLayout;
-    QVBoxLayout *vBoxLayout = new QVBoxLayout(dialog);
-    QPushButton *selectPushButton = new QPushButton(dialog);
-    QSpacerItem *spacerItem = new QSpacerItem(400, 20);
+    this->_browsingInFileSystem = new Arad::GeneratingForm::AradStyleFormGenerator::BrowsingInFileSystem;
 
-    dialog->setFixedSize(600, 400);
+    this->_browsingInFileSystem->dialog->setFixedSize(600, 400);
 
-    selectPushButton->setText("select");
+    this->_browsingInFileSystem->selectPushButton->setText("select");
+    this->_browsingInFileSystem->selectPushButton->setEnabled(true);
 
-    this->_fileSystemModel = new QFileSystemModel(dialog);
-    this->_fileSystemModel->setReadOnly(false);
-    this->_fileSystemModel->setRootPath(QDir::homePath());
-    QModelIndex rootPathIndex = this->_fileSystemModel->index(QDir::homePath());
+    this->_browsingInFileSystem->spacerItem = new QSpacerItem(400, 20);
 
-    this->_treeView = new QTreeView(dialog);
-    this->_treeView->setModel(this->_fileSystemModel);
-    this->_treeView->expand(rootPathIndex);
-    this->_treeView->scrollTo(rootPathIndex);
-    this->_treeView->setCurrentIndex(rootPathIndex);
-    this->_treeView->resizeColumnToContents(0);
+    this->_browsingInFileSystem->fileSystemModel = new QFileSystemModel(this->_browsingInFileSystem->dialog);
+    this->_browsingInFileSystem->fileSystemModel->setReadOnly(true);
+    this->_browsingInFileSystem->fileSystemModel->setRootPath(QDir::homePath());
+    QModelIndex rootPathIndex = this->_browsingInFileSystem->fileSystemModel->index(QDir::homePath());
 
-    hBoxLayout->addWidget(selectPushButton);
-    hBoxLayout->addItem(spacerItem);
-    vBoxLayout->addWidget(this->_treeView);
-    vBoxLayout->addLayout(hBoxLayout);
+    this->_browsingInFileSystem->treeView = new QTreeView(this->_browsingInFileSystem->dialog);
+    this->_browsingInFileSystem->treeView->setModel(this->_browsingInFileSystem->fileSystemModel);
+    this->_browsingInFileSystem->treeView->expand(rootPathIndex);
+    this->_browsingInFileSystem->treeView->scrollTo(rootPathIndex);
+    this->_browsingInFileSystem->treeView->setCurrentIndex(rootPathIndex);
+    this->_browsingInFileSystem->treeView->resizeColumnToContents(0);
 
-    dialog->show();
-    dialog->exec();
+    QObject::connect(this->_browsingInFileSystem->treeView, SIGNAL(doubleClicked(QModelIndex)), this,
+                     SLOT(slot_treeViewDoubleClicked(QModelIndex)));
+
+    QObject::connect(this->_browsingInFileSystem->selectPushButton, SIGNAL(clicked()), this,
+                     SLOT(slot_selectPushButtonClicked()));
+
+    this->_browsingInFileSystem->hBoxLayout->addWidget(this->_browsingInFileSystem->selectPushButton);
+    this->_browsingInFileSystem->hBoxLayout->addItem(this->_browsingInFileSystem->spacerItem);
+    this->_browsingInFileSystem->vBoxLayout->addWidget(this->_browsingInFileSystem->treeView);
+    this->_browsingInFileSystem->vBoxLayout->addLayout(this->_browsingInFileSystem->hBoxLayout);
+
+    this->_browsingInFileSystem->dialog->show();
+    this->_browsingInFileSystem->dialog->exec();
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::slot_treeViewDoubleClicked(QModelIndex index)
+{
+    if (this->_browsingInFileSystem->fileSystemModel->fileInfo(index).isFile())
+    {
+        this->_browsingInFileSystem->pathOfSelectedFile = \
+                this->_browsingInFileSystem->fileSystemModel->fileInfo(index).absoluteFilePath();
+
+        this->_lineEdit->setText(this->_browsingInFileSystem->pathOfSelectedFile);
+
+        this->_browsingInFileSystem->dialog->close();
+    }
+    else /// directory
+    {
+        QModelIndex currentIndex = this->_browsingInFileSystem->treeView->currentIndex();
+        this->_browsingInFileSystem->treeView->expand(currentIndex);
+        this->_browsingInFileSystem->treeView->scrollTo(currentIndex);
+    }
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked()
+{
+    emit this->_browsingInFileSystem->treeView->doubleClicked(this->_browsingInFileSystem->treeView->currentIndex());
 }
