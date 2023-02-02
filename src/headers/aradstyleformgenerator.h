@@ -11,6 +11,10 @@
 #include <QFrame>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QFileSystemModel>
+#include <QTreeView>
 
 namespace Arad
 {
@@ -18,8 +22,10 @@ namespace Arad
     namespace GeneratingForm
     {
 
-        class AradStyleFormGenerator : public Arad::GeneratingForm::FormGenerator
+        class AradStyleFormGenerator : public QPushButton, public Arad::GeneratingForm::FormGenerator
         {
+            Q_OBJECT
+
         public:
             explicit AradStyleFormGenerator(QString const& filePath, QWidget* parent = nullptr);
             virtual ~AradStyleFormGenerator();
@@ -45,6 +51,19 @@ namespace Arad
 
             QDoubleSpinBox *_doubleSpinBox = nullptr;
             QVector<QDoubleSpinBox*> _doubleSpinBoxContainer;
+
+            QCheckBox *_checkBox = nullptr;
+            QVector<QCheckBox*> _checkBoxContainer;
+
+            QPushButton *_pushButton = nullptr;
+            QVector<QPushButton*> _pushButtonContainer;
+
+            QFileSystemModel *_fileSystemModel = nullptr;
+
+            QTreeView *_treeView = nullptr;
+
+        private slots:
+            void slot_browsePushButtonClicked();
 
         };
 

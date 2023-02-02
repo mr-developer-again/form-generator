@@ -4,7 +4,16 @@
 #include <QMap>
 #include <QVector>
 #include <QStringList>
+#include <QMessageBox>
+#include <QDialog>
+#include <QSpacerItem>
+
 #include <limits>
+#include <stdexcept>
+
+//////////// TESTING //////////////
+#include <QTextStream>
+/////////// END OF TESTING ////////////
 
 Arad::GeneratingForm::AradStyleFormGenerator::AradStyleFormGenerator(QString const& filePath, QWidget* parent)
     : Arad::GeneratingForm::FormGenerator(filePath, parent)
@@ -18,7 +27,19 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
     this->_jsonParser = new Arad::Parser::AradStyleJsonParser(filePath);
     QStringList validKeys = this->_jsonParser->getValidKeys();
 
-    QVector<QMap<QString, QString>> tempVector = this->_jsonParser->parseJson();
+    QVector<QMap<QString, QString>> tempVector;
+    try
+    {
+        tempVector = this->_jsonParser->parseJson();
+    }
+    catch(std::runtime_error const& ex)
+    {
+        QMessageBox mesgBx;
+        mesgBx.setText(ex.what());
+        mesgBx.exec();
+
+        return;
+    }
 
     this->_vBoxLayout = new QVBoxLayout(this->_widget);
 
@@ -27,6 +48,8 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
     this->_splitterLine->setFrameShadow(QFrame::Sunken);
 
     QString defaultValue;
+    QString description;
+    QString checkBoxLabel;
     for (auto const& innerMap : tempVector)
     {
         this->_hBoxLayout = new QHBoxLayout;
@@ -35,22 +58,33 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
         {
             if (validKey == "name")
             {
-                this->_label = new QLabel(this->_widget);
-                this->_label->setText(innerMap[validKey].toLower() + " :");
-                this->_labelContainer.push_back(this->_label);
+                if (innerMap["type"].toLower() != "bool")
+                {
+                    this->_label = new QLabel(this->_widget);
+                    this->_label->setText(innerMap[validKey].toLower() + " :");
+                    this->_labelContainer.push_back(this->_label);
 
-                this->_hBoxLayout->addWidget(this->_label);
+                    this->_hBoxLayout->addWidget(this->_label);
+                }
+                else
+                {
+                    checkBoxLabel = innerMap[validKey];
+                }
             }
-            else if (validKey == "value")
+            else if (validKey == "default value")
             {
                 defaultValue = innerMap[validKey].toLower();
+            }
+            else if (validKey == "description")
+            {
+                description = innerMap[validKey];
             }
             else if (validKey == "type")
             {
                 if (innerMap[validKey].toLower() == "string")
                 {
                     this->_lineEdit = new QLineEdit(this->_widget);
-                    this->_lineEdit->setPlaceholderText(defaultValue);
+                    this->_lineEdit->setPlaceholderText(description);
                     this->_lineEditContainer.push_back(this->_lineEdit);
 
                     if (innerMap["readonly"].toLower() == "true")
@@ -64,11 +98,49 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                 }
                 else if (innerMap[validKey].toLower() == "bool")
                 {
-                    ;
+                    this->_checkBox = new QCheckBox(this->_widget);
+
+                    if (defaultValue == "checked-true" or defaultValue.isEmpty())
+                        this->_checkBox->setChecked(true);
+                    else if (defaultValue == "checked-false")
+                        this->_checkBox->setChecked(false);
+
+                    if (innerMap["readonly"] == "true")
+                        this->_checkBox->setEnabled(false);
+                    else if (innerMap["readonly"] == "false")
+                        this->_checkBox->setEnabled(true);
+
+                    this->_checkBox->setText(checkBoxLabel);
+                    this->_checkBoxContainer.push_back(this->_checkBox);
+
+                    this->_hBoxLayout->addWidget(this->_checkBox);
                 }
                 else if (innerMap[validKey].toLower() == "file")
                 {
-                    ;
+                    this->_lineEdit = new QLineEdit(this->_widget);
+                    this->_lineEdit->setPlaceholderText(description);
+
+                    this->_pushButton = new QPushButton(this->_widget);
+                    this->_pushButton->setText("Browse");
+
+                    if (innerMap["readonly"] == "true")
+                    {
+                        this->_lineEdit->setEnabled(false);
+                        this->_pushButton->setEnabled(false);
+                    }
+                    else if (innerMap["readonly"] == "false")
+                    {
+                        this->_lineEdit->setEnabled(true);
+                        this->_pushButton->setEnabled(true);
+                    }
+
+                    this->_lineEditContainer.push_back(this->_lineEdit);
+                    this->_pushButtonContainer.push_back(this->_pushButton);
+
+                    QObject::connect(this->_pushButton, SIGNAL(clicked()), this, SLOT(slot_browsePushButtonClicked()));
+
+                    this->_hBoxLayout->addWidget(this->_lineEdit);
+                    this->_hBoxLayout->addWidget(this->_pushButton);
                 }
                 else if (innerMap[validKey].toLower() == "number_i" or innerMap[validKey].toLower() == "number_ui")
                 {
@@ -148,6 +220,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
         this->_vBoxLayout->addLayout(this->_hBoxLayout);
 
         defaultValue = "";
+        checkBoxLabel = "";
     }
 
     this->_widget->show();
@@ -163,6 +236,8 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
     delete this->_vBoxLayout;
     delete this->_regularSpinBox;
     delete this->_doubleSpinBox;
+    delete this->_fileSystemModel;
+    delete this->_treeView;
 
     for (auto &label : this->_labelContainer)
         delete label;
@@ -178,4 +253,38 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
 
     for (auto &doubleSpinBox : this->_doubleSpinBoxContainer)
         delete doubleSpinBox;
+}
+
+
+void Arad::GeneratingForm::AradStyleFormGenerator::slot_browsePushButtonClicked()
+{
+    QDialog *dialog = new QDialog(this);
+    QHBoxLayout *hBoxLayout = new QHBoxLayout;
+    QVBoxLayout *vBoxLayout = new QVBoxLayout(dialog);
+    QPushButton *selectPushButton = new QPushButton(dialog);
+    QSpacerItem *spacerItem = new QSpacerItem(400, 20);
+
+    dialog->setFixedSize(600, 400);
+
+    selectPushButton->setText("select");
+
+    this->_fileSystemModel = new QFileSystemModel(dialog);
+    this->_fileSystemModel->setReadOnly(false);
+    this->_fileSystemModel->setRootPath(QDir::homePath());
+    QModelIndex rootPathIndex = this->_fileSystemModel->index(QDir::homePath());
+
+    this->_treeView = new QTreeView(dialog);
+    this->_treeView->setModel(this->_fileSystemModel);
+    this->_treeView->expand(rootPathIndex);
+    this->_treeView->scrollTo(rootPathIndex);
+    this->_treeView->setCurrentIndex(rootPathIndex);
+    this->_treeView->resizeColumnToContents(0);
+
+    hBoxLayout->addWidget(selectPushButton);
+    hBoxLayout->addItem(spacerItem);
+    vBoxLayout->addWidget(this->_treeView);
+    vBoxLayout->addLayout(hBoxLayout);
+
+    dialog->show();
+    dialog->exec();
 }

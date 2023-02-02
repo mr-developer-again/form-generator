@@ -1,29 +1,32 @@
-valid syntax for Json file (to parse):
+* valid syntax for Json file (to parse):
 
 	[
 		{
-			"name": "some_string (value)",
-			"value": "some_string (value)",
-			"type": "some_string (value)",
-			"readonly": "some_string (value)"
+			"name": "some_string",
+			"type": "some_string",
+			"default value": "some_string",
+			"description": "some_string",
+			"readonly": "some_string"
 		},
 		{
-			"name": "some_string (value)",
-			"value": "some_string (value)",
-			"type": "some_string (value)",
-			"readonly": "some_string (value)"
+			"name": "some_string",
+			"type": "some_string",
+			"default value": "some_string",
+			"description": "some_string",
+			"readonly": "some_string"
 		},
 		...
 	]
 
-some notes about valid values for the written keys:
+		NOTE: Case sensitivity is ignored for all keys
+
+
+* some notes about valid values for the written keys:
 
 	1) name key     -> actually the value is label name that will be written next to the main object
 				       (for example main object can be a lineEdit or pushButton or etc)
 
-	2) value key    -> default value for the main object
-
-	3) type key     -> this is type of the main object (for example lineEdit, pushButton, ...)
+	2) type key     -> this is type of the main object (for example lineEdit, pushButton, ...)
 
 							NOTE: valid types:
 									- bool (checkbox representative)
@@ -41,4 +44,16 @@ some notes about valid values for the written keys:
 									- file (lineEdit and fileBrowser representative)
 
 
-	4) readonly key -> the value for this key is true or false (if it's false, you can't change value of this object)
+	3) default value key (optional) -> default value for the main object
+
+											NOTE: you can't set the "default value" key for "string" and "file" types.
+
+
+	4) description key (optional)   -> if you want to write some description inside lineEdit, you can use this key
+
+											NOTE: this key (description) is used only for the types that have lineEdit (file, string)
+
+
+
+	5) readonly key (optional)      -> the value for this key is true or false (if it's false, you can't change value of this object)
+									   (deafult value for this key (if you don't determine it), is false)

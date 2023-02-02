@@ -17,9 +17,16 @@ namespace Arad
         {
         public:
             explicit AradStyleJsonParser(QString const& filePath,
-                                        QStringList const& validKeys = {"name", "value", "type", "readonly"});
+                                        QStringList const& validKeys = {"name", "default value", "description", "type", "readonly"});
 
             QVector<QMap<QString, QString>> parseJson() override;
+
+        private:
+            /// this method writes all valid keys inside the given map
+            void extractedMapBalancer(QMap<QString, QString> &inputMap);
+
+            /// this method checks correctness of the json file
+            bool jsonIsCorrect(QMap<QString, QString> const& inputMap, QString& error);
         };
 
     } // Parser namespace

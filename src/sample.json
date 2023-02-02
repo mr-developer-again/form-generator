@@ -1,38 +1,50 @@
 [
 	{
 		"name": "first name",
-		"value": "first name",
+		"description": "first name",
 		"type": "string",
 		"readonly": "false"
 	},
 	{
 		"name": "last name",
-		"value": "last name",
+		"description": "last name",
 		"type": "string",
 		"readonly": "true"
 	},
 	{
 		"name": "age",
-		"value": "19",
+		"default value": "19",
 		"type": "number_ui",
 		"readonly": "false"
 	},
 	{
 		"name": "height",
-		"value": "-1.0",
+		"default value": "-1.0",
 		"type": "number_f",
 		"readonly": "false"
 	},
 	{
 		"name": "some integer",
-		"value": "-5",
+		"default value": "-5",
 		"type": "number_i",
 		"readonly": "true"
 	},
 	{
 		"name": "some double",
-		"value": "3.14",
+		"default value": "3.14",
 		"type": "number_uf",
+		"readonly": "false"
+	},
+	{
+		"name": "is alive",
+		"default value": "checked-true",
+		"type": "bool",
+		"readonly": "true"
+	},
+	{
+		"name": "CV Path",
+		"description": "Enter your CV path here",
+		"type": "file",
 		"readonly": "false"
 	}
 ]
