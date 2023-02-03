@@ -41,8 +41,6 @@ namespace Arad
             };
 
         public:
-
-
             explicit AradStyleFormGenerator(QString const& filePath, QWidget* parent = nullptr);
             virtual ~AradStyleFormGenerator();
 

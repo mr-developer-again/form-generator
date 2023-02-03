@@ -299,15 +299,29 @@ void Arad::GeneratingForm::AradStyleFormGenerator::slot_treeViewDoubleClicked(QM
 
         this->_browsingInFileSystem->dialog->close();
     }
-    else /// directory
-    {
-        QModelIndex currentIndex = this->_browsingInFileSystem->treeView->currentIndex();
-        this->_browsingInFileSystem->treeView->expand(currentIndex);
-        this->_browsingInFileSystem->treeView->scrollTo(currentIndex);
-    }
+//    else if (this->_browsingInFileSystem->fileSystemModel->fileInfo(index).isDir())
+//    {
+//        QTextStream out(stdout);
+//        out << "directory double clicked\n";
+//    }
 }
 
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked()
 {
-    emit this->_browsingInFileSystem->treeView->doubleClicked(this->_browsingInFileSystem->treeView->currentIndex());
+    QModelIndex currentIndex = this->_browsingInFileSystem->treeView->currentIndex();
+
+    if (this->_browsingInFileSystem->fileSystemModel->fileInfo(currentIndex).isFile())
+        emit this->_browsingInFileSystem->treeView->doubleClicked(currentIndex);
+    else if (this->_browsingInFileSystem->fileSystemModel->fileInfo(currentIndex).isDir())
+    {
+        if (!this->_browsingInFileSystem->treeView->isExpanded(currentIndex))
+        {
+            this->_browsingInFileSystem->treeView->expand(currentIndex);
+            this->_browsingInFileSystem->treeView->scrollTo(currentIndex);
+        }
+        else
+        {
+            this->_browsingInFileSystem->treeView->collapse(currentIndex);
+        }
+    }
 }
