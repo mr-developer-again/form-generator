@@ -4,7 +4,6 @@
 #include <QMap>
 #include <QVector>
 #include <QStringList>
-#include <QMessageBox>
 #include <QDialog>
 #include <QSpacerItem>
 
@@ -24,28 +23,15 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
     QStringList validKeys = this->_jsonParser->getValidKeys();
 
     QVector<QMap<QString, QString>> tempVector;
-    try
-    {
-        tempVector = this->_jsonParser->parseJson();
-    }
-    catch(std::runtime_error const& ex)
-    {
-        QMessageBox mesgBx;
-        mesgBx.setText(ex.what());
-        mesgBx.exec();
-
-        return;
-    }
+    tempVector = this->_jsonParser->parseJson();
 
     this->_vBoxLayout = new QVBoxLayout(this->_widget);
 
-    this->_splitterLine = new QFrame(this->_widget);
-    this->_splitterLine->setFrameShape(QFrame::HLine);
-    this->_splitterLine->setFrameShadow(QFrame::Sunken);
 
     QString defaultValue;
     QString description;
     QString checkBoxLabel;
+    uint32_t counter = 0;
     for (auto const& innerMap : tempVector)
     {
         this->_hBoxLayout = new QHBoxLayout;
@@ -57,7 +43,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                 if (innerMap["type"].toLower() != "bool")
                 {
                     this->_label = new QLabel(this->_widget);
-                    this->_label->setText(innerMap[validKey].toLower() + " :");
+                    this->_label->setText(innerMap[validKey].toLower().trimmed() + " :");
                     this->_labelContainer.push_back(this->_label);
 
                     this->_hBoxLayout->addWidget(this->_label);
@@ -69,7 +55,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
             }
             else if (validKey == "default value")
             {
-                defaultValue = innerMap[validKey].toLower();
+                defaultValue = innerMap[validKey].toLower().trimmed();
             }
             else if (validKey == "description")
             {
@@ -77,22 +63,35 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
             }
             else if (validKey == "type")
             {
-                if (innerMap[validKey].toLower() == "string")
+                if (innerMap[validKey].toLower().trimmed() == "string")
                 {
                     this->_lineEdit = new QLineEdit(this->_widget);
                     this->_lineEdit->setPlaceholderText(description);
                     this->_lineEditContainer.push_back(this->_lineEdit);
 
-                    if (innerMap["readonly"].toLower() == "true")
+                    if (innerMap["readonly"].toLower().trimmed() == "true")
                         this->_lineEdit->setEnabled(false);
 
                     this->_hBoxLayout->addWidget(this->_lineEdit);
                 }
-                else if (innerMap[validKey].toLower() == "string list")
+                else if (innerMap[validKey].toLower().trimmed() == "string list")
                 {
-                    ;
+                    this->_comboBox = new QComboBox(this->_widget);
+
+                    QString comboBoxValues_str = innerMap["string list values"];
+                    QStringList comboBoxValues_list = comboBoxValues_str.split(u' ', Qt::KeepEmptyParts);
+                    this->_comboBox->addItems(comboBoxValues_list);
+                    this->_comboBox->setCurrentText(defaultValue);
+
+                    if (innerMap["readonly"].toLower().trimmed() == "false" or !innerMap.contains("readonly"))
+                        this->_comboBox->setEnabled(true);
+                    else if (innerMap["readonly"].toLower().trimmed() == "true")
+                        this->_comboBox->setEnabled(false);
+
+                    this->_comboBoxContainer.push_back(this->_comboBox);
+                    this->_hBoxLayout->addWidget(this->_comboBox);
                 }
-                else if (innerMap[validKey].toLower() == "bool")
+                else if (innerMap[validKey].toLower().trimmed() == "bool")
                 {
                     this->_checkBox = new QCheckBox(this->_widget);
 
@@ -103,7 +102,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     if (innerMap["readonly"] == "true")
                         this->_checkBox->setEnabled(false);
-                    else if (innerMap["readonly"] == "false")
+                    else if (innerMap["readonly"] == "false" or !innerMap.contains("readonly"))
                         this->_checkBox->setEnabled(true);
 
                     this->_checkBox->setText(checkBoxLabel);
@@ -111,7 +110,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     this->_hBoxLayout->addWidget(this->_checkBox);
                 }
-                else if (innerMap[validKey].toLower() == "file")
+                else if (innerMap[validKey].toLower().trimmed() == "file")
                 {
                     this->_lineEdit = new QLineEdit(this->_widget);
                     this->_lineEdit->setPlaceholderText(description);
@@ -124,7 +123,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                         this->_lineEdit->setEnabled(false);
                         this->_pushButton->setEnabled(false);
                     }
-                    else if (innerMap["readonly"] == "false")
+                    else if (innerMap["readonly"] == "false" or !innerMap.contains("readonly"))
                     {
                         this->_lineEdit->setEnabled(true);
                         this->_pushButton->setEnabled(true);
@@ -138,7 +137,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     this->_hBoxLayout->addWidget(this->_lineEdit);
                     this->_hBoxLayout->addWidget(this->_pushButton);
                 }
-                else if (innerMap[validKey].toLower() == "number_i" or innerMap[validKey].toLower() == "number_ui")
+                else if (innerMap[validKey].toLower().trimmed() == "number_i" or innerMap[validKey].toLower().trimmed() == "number_ui")
                 {
                     if (!defaultValue.isEmpty())
                     {
@@ -156,11 +155,11 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     int32_t maxInt = static_cast<int>(std::numeric_limits<int>::max());
                     int32_t minInt = static_cast<int>(std::numeric_limits<int>::min());
                     int32_t value = defaultValue.toInt();
-                    if (innerMap[validKey].toLower() == "number_i")
+                    if (innerMap[validKey].toLower().trimmed() == "number_i")
                     {
                         this->_regularSpinBox->setRange(minInt, maxInt);
                     }
-                    else if (innerMap[validKey].toLower() == "number_ui")
+                    else if (innerMap[validKey].toLower().trimmed() == "number_ui")
                     {
                         if (value < 0)
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_ui");
@@ -173,7 +172,7 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     this->_hBoxLayout->addWidget(this->_regularSpinBox);
                 }
-                else if (innerMap[validKey].toLower() == "number_f" or innerMap[validKey].toLower() == "number_uf")
+                else if (innerMap[validKey].toLower().trimmed() == "number_f" or innerMap[validKey].toLower().trimmed() == "number_uf")
                 {
                     if (!defaultValue.isEmpty())
                     {
@@ -191,11 +190,11 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     double minDouble = static_cast<float>(std::numeric_limits<int>::min());
                     double maxDouble = std::numeric_limits<float>::max();
                     double value = defaultValue.toDouble();
-                    if (innerMap[validKey].toLower() == "number_f")
+                    if (innerMap[validKey].toLower().trimmed() == "number_f")
                     {
                         this->_doubleSpinBox->setRange(minDouble, maxDouble);
                     }
-                    else if (innerMap[validKey].toLower() == "number_uf")
+                    else if (innerMap[validKey].toLower().trimmed() == "number_uf")
                     {
                         if (value < 0)
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_uf");
@@ -211,17 +210,26 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
             }
         }
 
+
         this->_hBoxLayoutContainer.push_back(this->_hBoxLayout);
-        this->_vBoxLayout->addWidget(this->_splitterLine);
         this->_vBoxLayout->addLayout(this->_hBoxLayout);
+        if (counter != (tempVector.size() - 1))
+        {
+            this->_splitterLine = new QFrame(this->_widget);
+            this->_splitterLine->setFrameShape(QFrame::HLine);
+            this->_splitterLine->setFrameShadow(QFrame::Sunken);
+            this->_splitterLineContainer.push_back(this->_splitterLine);
+            this->_vBoxLayout->addWidget(this->_splitterLine);
+        }
 
         defaultValue = "";
         checkBoxLabel = "";
+
+        ++counter;
     }
 
     this->_widget->show();
 }
-
 
 Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
 {
@@ -299,11 +307,6 @@ void Arad::GeneratingForm::AradStyleFormGenerator::slot_treeViewDoubleClicked(QM
 
         this->_browsingInFileSystem->dialog->close();
     }
-//    else if (this->_browsingInFileSystem->fileSystemModel->fileInfo(index).isDir())
-//    {
-//        QTextStream out(stdout);
-//        out << "directory double clicked\n";
-//    }
 }
 
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked()

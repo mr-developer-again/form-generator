@@ -46,5 +46,11 @@
 		"description": "Enter your CV path here",
 		"type": "file",
 		"readonly": "false"
+	},
+	{
+		"name": "level",
+		"type": "string list",
+		"string list values": ["familiar", "beginner", "junior", "mid-level", "skilled", "expert"],
+		"default value": "beginner"
 	}
 ]

@@ -5,20 +5,18 @@
 			"name": "some_string",
 			"type": "some_string",
 			"default value": "some_string",
+			"string list values": ["value1", "value2", ...],
 			"description": "some_string",
 			"readonly": "some_string"
 		},
 		{
-			"name": "some_string",
-			"type": "some_string",
-			"default value": "some_string",
-			"description": "some_string",
-			"readonly": "some_string"
+			...
 		},
 		...
 	]
 
 		NOTE: Case sensitivity is ignored for all keys
+		NOTE: Order is not important in writting the keys
 
 
 * some notes about valid values for the written keys:
@@ -44,16 +42,19 @@
 									- file (lineEdit and fileBrowser representative)
 
 
-	3) default value key (optional) -> default value for the main object
+	3) string list values key       -> value for this key is a array of values that you want to set for the combo-box
+
+
+	4) default value key (optional) -> default value for the main object
 
 											NOTE: you can't set the "default value" key for "string" and "file" types.
 
 
-	4) description key (optional)   -> if you want to write some description inside lineEdit, you can use this key
+	5) description key (optional)   -> if you want to write some description inside lineEdit, you can use this key
 
-											NOTE: this key (description) is used only for the types that have lineEdit (file, string)
+											NOTE: this key (description) is used only for the types which have lineEdit (file, string)
 
 
 
-	5) readonly key (optional)      -> the value for this key is true or false (if it's false, you can't change value of this object)
+	6) readonly key (optional)      -> the value for this key is true or false (if it's false, you can't change value of this object)
 									   (deafult value for this key (if you don't determine it), is false)

@@ -16,6 +16,8 @@
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QDialog>
+#include <QComboBox>
+#include <QStringList>
 
 namespace Arad
 {
@@ -59,6 +61,7 @@ namespace Arad
             QVector<QLineEdit*> _lineEditContainer;
 
             QFrame *_splitterLine = nullptr;
+            QVector<QFrame*> _splitterLineContainer;
 
             QSpinBox *_regularSpinBox = nullptr;
             QVector<QSpinBox*> _regularSpinBoxContainer;
@@ -71,6 +74,9 @@ namespace Arad
 
             QPushButton *_pushButton = nullptr;
             QVector<QPushButton*> _pushButtonContainer;
+
+            QComboBox *_comboBox = nullptr;
+            QVector<QComboBox*> _comboBoxContainer;
 
             BrowsingInFileSystem *_browsingInFileSystem = nullptr;
 

@@ -49,13 +49,26 @@ QVector<QMap<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
                 {
                     if (validKeys.contains(key.toLower()))
                     {
-                        auto value = jsonObject.take(key);
-                        tempMap.insert(key, value.toString());
+                        QJsonValue value = jsonObject.take(key);
+
+                        if (value.isArray())
+                        {
+                            QJsonArray valueArray = value.toArray();
+                            QString resultValue = "";
+                            for (auto const& valueFromArray : valueArray)
+                            {
+                                resultValue += (valueFromArray.toString() + " ");
+//                                resultValue += ;
+                            }
+
+                            resultValue = resultValue.trimmed();
+                            tempMap.insert(key, resultValue);
+                        }
+                        else
+                            tempMap.insert(key, value.toString());
                     }
                 }
             }
-
-            this->extractedMapBalancer(tempMap);
 
             QString error;
             if (!this->jsonIsCorrect(tempMap, error))
@@ -78,14 +91,8 @@ void Arad::Parser::AradStyleJsonParser::extractedMapBalancer(QMap<QString, QStri
     for (auto const& validKey : validKeys)
     {
         if (!inputMap.contains(validKey))
-        {
             if (validKey == "readonly")
                 inputMap.insert(validKey, "false");
-            else if (validKey == "default value" or validKey == "description")
-                inputMap.insert(validKey, "");
-            else
-                inputMap.insert(validKey, "");
-        }
     }
 }
 
@@ -99,7 +106,7 @@ bool Arad::Parser::AradStyleJsonParser::jsonIsCorrect(QMap<QString, QString> con
             return false;
         }
     }
-    else
+    else /// if the type is other than "string" and "file"
     {
         if (!inputMap["description"].isEmpty())
         {

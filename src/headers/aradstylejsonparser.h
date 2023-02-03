@@ -17,7 +17,8 @@ namespace Arad
         {
         public:
             explicit AradStyleJsonParser(QString const& filePath,
-                                        QStringList const& validKeys = {"name", "default value", "description", "type", "readonly"});
+                                        QStringList const& validKeys =
+                                        {"name", "default value", "string list values", "description", "type", "readonly"});
 
             QVector<QMap<QString, QString>> parseJson() override;
 
