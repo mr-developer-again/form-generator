@@ -20,6 +20,9 @@ namespace Arad
 
             virtual void setupForm() = 0;
 
+            /// this method loads some file and colorize the main widget
+            /// (and also changes style of the widget)
+            virtual void darkTheme();
         protected:
             virtual void setFilePath(QString const& filePath);
             virtual QString getFilePath() const noexcept;

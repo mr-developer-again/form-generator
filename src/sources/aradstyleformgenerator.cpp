@@ -6,6 +6,8 @@
 #include <QStringList>
 #include <QDialog>
 #include <QSpacerItem>
+#include <QFile>
+#include <QTextStream>
 
 #include <limits>
 #include <stdexcept>

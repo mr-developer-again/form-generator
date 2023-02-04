@@ -49,6 +49,7 @@ namespace Arad
             void setupForm() override;
 
         private:
+
             QHBoxLayout *_hBoxLayout = nullptr;
             QVector<QHBoxLayout*> _hBoxLayoutContainer;
 
