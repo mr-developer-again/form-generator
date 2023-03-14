@@ -58,7 +58,6 @@ QVector<QMap<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
                             for (auto const& valueFromArray : valueArray)
                             {
                                 resultValue += (valueFromArray.toString() + " ");
-//                                resultValue += ;
                             }
 
                             resultValue = resultValue.trimmed();
@@ -84,37 +83,8 @@ QVector<QMap<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
     return result;
 }
 
-void Arad::Parser::AradStyleJsonParser::extractedMapBalancer(QMap<QString, QString>& inputMap)
-{
-    QStringList validKeys = this->getValidKeys();
-
-    for (auto const& validKey : validKeys)
-    {
-        if (!inputMap.contains(validKey))
-            if (validKey == "readonly")
-                inputMap.insert(validKey, "false");
-    }
-}
-
 bool Arad::Parser::AradStyleJsonParser::jsonIsCorrect(QMap<QString, QString> const& inputMap, QString &error)
 {
-    if (inputMap["type"] == "string" or inputMap["type"] == "file")
-    {
-        if (!inputMap["default value"].isEmpty())
-        {
-            error = "you can't set default value for \"string\" and \"file\" types";
-            return false;
-        }
-    }
-    else /// if the type is other than "string" and "file"
-    {
-        if (!inputMap["description"].isEmpty())
-        {
-            error = "you can't set description for non-\"string/file\" types";
-            return false;
-        }
-    }
-
     if (inputMap["name"] == "" or inputMap["type"] == "")
     {
         error = "you must set \"name\" and \"type\" keys and also fill value of them";

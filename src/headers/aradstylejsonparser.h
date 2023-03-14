@@ -23,9 +23,6 @@ namespace Arad
             QVector<QMap<QString, QString>> parseJson() override;
 
         private:
-            /// this method writes all valid keys inside the given map
-            void extractedMapBalancer(QMap<QString, QString> &inputMap);
-
             /// this method checks correctness of the json file
             bool jsonIsCorrect(QMap<QString, QString> const& inputMap, QString& error);
         };

@@ -24,6 +24,12 @@ set(PROJECT_SOURCES
 		"headers/aradstylejsonparser.h"
 		"sources/aradstyleformgenerator.cpp"
 		"headers/aradstyleformgenerator.h"
+		"headers/switchbutton.h"
+		"sources/switchbutton.cpp"
+		"headers/jsongenerator.h"
+		"sources/jsongenerator.cpp"
+		"headers/aradstylejsongenerator.h"
+		"sources/aradstylejsongenerator.cpp"
 )
 
 set(RESOURCE

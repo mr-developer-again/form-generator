@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QString filePath = "/home/ali/projects/cpp_projects/Qt Projects/3.form_generator/src/sample.json";
+    QString filePath = "/home/arad/projects/projects2/qt_projects/form-generator/src/sample.json";
 
     Arad::GeneratingForm::FormGenerator *formGenerator = nullptr;
 

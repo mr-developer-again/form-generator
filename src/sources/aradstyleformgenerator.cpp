@@ -1,5 +1,7 @@
 #include <headers/aradstyleformgenerator.h>
 #include <headers/aradstylejsonparser.h>
+#include <headers/switchbutton.h>
+#include <headers/aradstylejsongenerator.h>
 
 #include <QMap>
 #include <QVector>
@@ -7,7 +9,9 @@
 #include <QDialog>
 #include <QSpacerItem>
 #include <QFile>
+#include <QFileDialog>
 #include <QTextStream>
+#include <QAbstractButton>
 
 #include <limits>
 #include <stdexcept>
@@ -29,11 +33,14 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
     this->_vBoxLayout = new QVBoxLayout(this->_widget);
 
+    this->_hBoxLayout = this->_themesSwitchButton(this->_widget, this);
+    this->_hBoxLayoutContainer.push_back(this->_hBoxLayout);
+    this->_vBoxLayout->addLayout(this->_hBoxLayout);
 
     QString defaultValue;
     QString description;
     QString checkBoxLabel;
-    uint32_t counter = 0;
+    int32_t counter = 0;
     for (auto const& innerMap : tempVector)
     {
         this->_hBoxLayout = new QHBoxLayout;
@@ -75,6 +82,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                         this->_lineEdit->setEnabled(false);
 
                     this->_hBoxLayout->addWidget(this->_lineEdit);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "l", this->_lineEditIndex);
+                    this->_lineEditIndex++;
                 }
                 else if (innerMap[validKey].toLower().trimmed() == "string list")
                 {
@@ -92,6 +102,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     this->_comboBoxContainer.push_back(this->_comboBox);
                     this->_hBoxLayout->addWidget(this->_comboBox);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "C", this->_comboBoxIndex);
+                    this->_comboBoxIndex++;
                 }
                 else if (innerMap[validKey].toLower().trimmed() == "bool")
                 {
@@ -111,6 +124,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     this->_checkBoxContainer.push_back(this->_checkBox);
 
                     this->_hBoxLayout->addWidget(this->_checkBox);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "c", this->_checkBoxIndex);
+                    this->_checkBoxIndex++;
                 }
                 else if (innerMap[validKey].toLower().trimmed() == "file")
                 {
@@ -138,6 +154,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     this->_hBoxLayout->addWidget(this->_lineEdit);
                     this->_hBoxLayout->addWidget(this->_pushButton);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "f", this->_fileIndex);
+                    this->_fileIndex++;
                 }
                 else if (innerMap[validKey].toLower().trimmed() == "number_i" or innerMap[validKey].toLower().trimmed() == "number_ui")
                 {
@@ -160,6 +179,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     if (innerMap[validKey].toLower().trimmed() == "number_i")
                     {
                         this->_regularSpinBox->setRange(minInt, maxInt);
+
+                        this->addItemToHashTable(this->_itemPrecedence, "s", this->_signedRegularSpinBoxIndex);
+                        this->_signedRegularSpinBoxIndex++;
                     }
                     else if (innerMap[validKey].toLower().trimmed() == "number_ui")
                     {
@@ -167,6 +189,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_ui");
 
                         this->_regularSpinBox->setRange(0, maxInt);
+
+                        this->addItemToHashTable(this->_itemPrecedence, "us", this->_unsignedRegularSpinBoxIndex);
+                        this->_unsignedRegularSpinBoxIndex++;
                     }
 
                     this->_regularSpinBox->setValue(value);
@@ -195,6 +220,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     if (innerMap[validKey].toLower().trimmed() == "number_f")
                     {
                         this->_doubleSpinBox->setRange(minDouble, maxDouble);
+
+                        this->addItemToHashTable(this->_itemPrecedence, "S", this->_signedDoubleSpinIndex);
+                        this->_signedDoubleSpinIndex++;
                     }
                     else if (innerMap[validKey].toLower().trimmed() == "number_uf")
                     {
@@ -202,6 +230,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_uf");
 
                         this->_doubleSpinBox->setRange(0.0f, maxDouble);
+
+                        this->addItemToHashTable(this->_itemPrecedence, "uS", this->_unsignedDoubleSpinIndex);
+                        this->_unsignedDoubleSpinIndex++;
                     }
 
                     this->_doubleSpinBox->setValue(value);
@@ -228,9 +259,68 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
         checkBoxLabel = "";
 
         ++counter;
+        this->_itemPrecedence++;
     }
 
+    this->_spacerItem = new QSpacerItem(50, 100);
+    this->_spacerItemContainer.push_back(this->_spacerItem);
+
+    this->_pushButton = new QPushButton("Cancel", this->_widget);
+    this->_pushButtonContainer.push_back(this->_pushButton);
+
+    this->_pushButton = new QPushButton("Save", this->_widget);
+    this->_pushButtonContainer.push_back(this->_pushButton);
+
+    this->_hBoxLayout = new QHBoxLayout;
+    this->_hBoxLayout->addItem(this->_spacerItem);
+    this->_hBoxLayout->addWidget(this->_pushButtonContainer[this->_pushButtonContainer.size() - 2]);
+    this->_hBoxLayout->addWidget(this->_pushButtonContainer[this->_pushButtonContainer.size() - 1]);
+    this->_hBoxLayout->addItem(this->_spacerItem);
+
+    this->_vBoxLayout->addLayout(this->_hBoxLayout);
+
+    /// @brief cancel button pushed
+    QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 2], &QPushButton::clicked, this, [this]{
+        this->_widget->close();
+    });
+
+    /// @brief save button pushed
+    QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 1], &QPushButton::clicked, [this]{
+        QFileDialog *fileDialog = new QFileDialog;
+        QString filePath = fileDialog->getSaveFileName();
+        QVector<QMap<QString, QString>> tempMap = this->_jsonParser->parseJson();
+//        Arad::JsonGeneratorNP::JsonGenerator *jsonGenerator = new Arad::JsonGeneratorNP::AradStyleJsonGenerator(filePath);
+    });
+
     this->_widget->show();
+    this->generatedFormSizeFixer();
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::generatedFormSizeFixer() noexcept
+{
+    this->_widget->setFixedSize(this->_widget->geometry().width(), this->_widget->geometry().height());
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::addItemToHashTable(int32_t itemPrecednece, QString const& itemType, int32_t indexOfItem)
+{
+    this->_hashTable.push_back({QString::number(itemPrecednece), itemType, QString::number(indexOfItem)});
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::JsonGenerator() const noexcept
+{
+    QVector<QMap<QString, QString>> tempVector;
+    tempVector = this->_jsonParser->parseJson();
+
+    int32_t counter = 0;
+    for (auto innerMap : tempVector)
+    {
+        for (auto mapItem : innerMap)
+        {
+            ;
+        }
+
+        counter++;
+    }
 }
 
 Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
@@ -243,21 +333,25 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
     delete this->_regularSpinBox;
     delete this->_doubleSpinBox;
     delete this->_browsingInFileSystem;
+    delete this->_spacerItem;
 
-    for (auto &label : this->_labelContainer)
+    for (auto label : this->_labelContainer)
         delete label;
 
-    for (auto &lineEdit : this->_lineEditContainer)
+    for (auto lineEdit : this->_lineEditContainer)
         delete lineEdit;
 
-    for(auto &hBoxLayout : this->_hBoxLayoutContainer)
+    for(auto hBoxLayout : this->_hBoxLayoutContainer)
         delete hBoxLayout;
 
-    for (auto &regularSpinBox : this->_regularSpinBoxContainer)
+    for (auto regularSpinBox : this->_regularSpinBoxContainer)
         delete regularSpinBox;
 
-    for (auto &doubleSpinBox : this->_doubleSpinBoxContainer)
+    for (auto doubleSpinBox : this->_doubleSpinBoxContainer)
         delete doubleSpinBox;
+
+    for (auto spacerItem : this->_spacerItemContainer)
+        delete spacerItem;
 }
 
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_browsePushButtonClicked()
@@ -329,4 +423,47 @@ void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked(
             this->_browsingInFileSystem->treeView->collapse(currentIndex);
         }
     }
+}
+
+QHBoxLayout* Arad::GeneratingForm::AradStyleFormGenerator::ThemesSwitchButton::operator()(QWidget* widget,
+                                                                                          Arad::GeneratingForm::AradStyleFormGenerator *mainForm)
+{
+    if (this->counter == 0)
+    {
+        widget->setStyleSheet("");
+        ++this->counter;
+    }
+
+    Arad::GeneratingForm::SwitchButton *switchButton = new struct Arad::GeneratingForm::SwitchButton::SwitchButton(widget);
+    QObject::connect(switchButton, &QAbstractButton::pressed, [this, mainForm]()
+    {
+        this->_themeIndex++;
+
+        if (this->_themes.size() == this->_themeIndex)
+            this->_themeIndex = 0;
+
+        mainForm->toggleTheme(this->_themes[this->_themeIndex]);
+    });
+
+    QLabel *nameLabel = new QLabel(widget);
+    nameLabel->setText("Dark Mode on: ");
+
+    QSpacerItem *spacerItem = new QSpacerItem(250, 50);
+    this->_themeToggleHBoxLayout = new QHBoxLayout;
+
+    this->_themeToggleHBoxLayout->addWidget(nameLabel);
+    this->_themeToggleHBoxLayout->addWidget(switchButton);
+    this->_themeToggleHBoxLayout->addItem(spacerItem);
+
+    return this->_themeToggleHBoxLayout;
+}
+
+Arad::GeneratingForm::AradStyleFormGenerator::ThemesSwitchButton::~ThemesSwitchButton()
+{
+    delete this->_themeToggleHBoxLayout;
+
+    //////////////// TESTING ////////////////////
+    QTextStream out(stdout);
+    out << "ARAD STYLE FORM GENERATOR DESCTURCTOR" << Qt::endl;
+    //////////////// TESTING ////////////////////
 }

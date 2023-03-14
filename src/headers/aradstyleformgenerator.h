@@ -1,6 +1,14 @@
 #ifndef ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_ARADSTYLEFORMGENERATOR_H
 #define ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_ARADSTYLEFORMGENERATOR_H
 
+namespace Arad
+{
+    namespace GeneratingForm
+    {
+        class SwitchButton;
+    }
+}
+
 #include <headers/formgenerator.h>
 
 #include <QString>
@@ -18,6 +26,7 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QStringList>
+#include <QSpacerItem>
 
 namespace Arad
 {
@@ -29,9 +38,8 @@ namespace Arad
         {
             Q_OBJECT
 
-            struct BrowsingInFileSystem
+            struct BrowsingInFileSystem final
             {
-            public:
                 QDialog *dialog = new QDialog;
                 QFileSystemModel *fileSystemModel = nullptr;
                 QTreeView *treeView = nullptr;
@@ -42,14 +50,33 @@ namespace Arad
                 QString pathOfSelectedFile = "";
             };
 
+            struct ThemesSwitchButton final : public QObject
+            {
+                ThemesSwitchButton() = default;
+                ~ThemesSwitchButton();
+
+                QHBoxLayout* operator()(QWidget *widget = nullptr,
+                                        Arad::GeneratingForm::AradStyleFormGenerator *mainForm = nullptr);
+
+            private:
+                QHBoxLayout *_themeToggleHBoxLayout = nullptr;
+
+                QVector<QString> _themes { "default", "dark" };
+                int32_t _themeIndex = 0;
+                int32_t counter = 0;
+            };
+
         public:
             explicit AradStyleFormGenerator(QString const& filePath, QWidget* parent = nullptr);
             virtual ~AradStyleFormGenerator();
 
             void setupForm() override;
 
-        private:
+        protected:
+            void generatedFormSizeFixer() noexcept;
+            void JsonGenerator() const noexcept;
 
+        private:
             QHBoxLayout *_hBoxLayout = nullptr;
             QVector<QHBoxLayout*> _hBoxLayoutContainer;
 
@@ -79,7 +106,42 @@ namespace Arad
             QComboBox *_comboBox = nullptr;
             QVector<QComboBox*> _comboBoxContainer;
 
+            QSpacerItem *_spacerItem = nullptr;
+            QVector<QSpacerItem*> _spacerItemContainer;
+
             BrowsingInFileSystem *_browsingInFileSystem = nullptr;
+
+            ThemesSwitchButton _themesSwitchButton;
+
+            /// @brief the following vector stores a hash table
+            ///        about items (priority of items)
+            /// @details the hash table stores items in the following style
+            ///             l  -> Line Edit
+            ///             c  -> Check Box
+            ///             C  -> Combo Box
+            ///             s  -> Spin Box (signed integer spin box)
+            ///             us -> Spin Box (unsigned interger spin box)
+            ///             S  -> Spin Box (signed double spin box)
+            ///             uS -> Spin Box (unsigned double spin box)
+            ///             f  -> file
+            QVector<QVector<QString>> _hashTable;
+
+            int32_t _itemPrecedence = 0;
+
+            /// @brief by the following variables, we want to keep index of
+            ///        item inside related container (to access the item)
+            int32_t _pushButtonIndex = 0;
+            int32_t _labelIndex = 0;
+            int32_t _lineEditIndex = 0;
+            int32_t _signedRegularSpinBoxIndex = 0;
+            int32_t _unsignedRegularSpinBoxIndex = 0;
+            int32_t _signedDoubleSpinIndex = 0;
+            int32_t _unsignedDoubleSpinIndex = 0;
+            int32_t _checkBoxIndex = 0;
+            int32_t _comboBoxIndex = 0;
+            int32_t _fileIndex = 0;
+
+            void addItemToHashTable(int32_t itemPrecednece, QString const& itemType, int32_t indexOfItem);
 
         private slots:
             void slot_browsePushButtonClicked();

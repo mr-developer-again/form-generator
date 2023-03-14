@@ -23,6 +23,13 @@ namespace Arad
             /// this method loads some file and colorize the main widget
             /// (and also changes style of the widget)
             virtual void darkTheme();
+
+            /// @brief This method change current theme to a abitrary theme
+            /// @param themeName: Theme name that we want to make it as the current them
+            ///        (valid themes that you can mention as param:
+            ///             1. dark  2. default)
+            virtual void toggleTheme(QString const& themeName);
+
         protected:
             virtual void setFilePath(QString const& filePath);
             virtual QString getFilePath() const noexcept;
