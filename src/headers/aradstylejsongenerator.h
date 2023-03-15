@@ -1,11 +1,7 @@
 #include <headers/jsongenerator.h>
 
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QFileDialog>
-
 #include <QVector>
-#include <QMap>
+#include <QHash>
 #include <QString>
 
 namespace Arad
@@ -27,9 +23,9 @@ namespace Arad
             AradStyleJsonGenerator() = default;
             ~AradStyleJsonGenerator() = default;
 
-            void operator()(QVector<QMap<QString, QString>> const& container,
-                            QVector<QString> const& orderedKeys = QVector<QString>(),
-                            QString const& filePath = "") override;
+            void operator()(QVector<QHash<QString, QString>> const& container,
+                            QString const& filePath,
+                            QVector<QString> const& orderedKeys = QVector<QString>{}) override;
         };
 
     } // namespace JsonGeneratorNP

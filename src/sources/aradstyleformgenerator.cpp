@@ -3,7 +3,7 @@
 #include <headers/switchbutton.h>
 #include <headers/aradstylejsongenerator.h>
 
-#include <QMap>
+#include <QHash>
 #include <QVector>
 #include <QStringList>
 #include <QDialog>
@@ -12,8 +12,8 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QAbstractButton>
+#include <QList>
 
-#include <limits>
 #include <stdexcept>
 
 Arad::GeneratingForm::AradStyleFormGenerator::AradStyleFormGenerator(QString const& filePath, QWidget* parent)
@@ -26,10 +26,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 {
     QString filePath = Arad::GeneratingForm::FormGenerator::getFilePath();
     this->_jsonParser = new Arad::Parser::AradStyleJsonParser(filePath);
-    QStringList validKeys = this->_jsonParser->getValidKeys();
+    QVector<QString> validKeys = this->_jsonParser->getValidKeys();
 
-    QVector<QMap<QString, QString>> tempVector;
-    tempVector = this->_jsonParser->parseJson();
+    QVector<QHash<QString, QString>> tempVector = this->_jsonParser->parseJson();
 
     this->_vBoxLayout = new QVBoxLayout(this->_widget);
 
@@ -37,11 +36,9 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
     this->_hBoxLayoutContainer.push_back(this->_hBoxLayout);
     this->_vBoxLayout->addLayout(this->_hBoxLayout);
 
-    QString defaultValue;
-    QString description;
     QString checkBoxLabel;
     int32_t counter = 0;
-    for (auto const& innerMap : tempVector)
+    for (auto& innerMap : tempVector)
     {
         this->_hBoxLayout = new QHBoxLayout;
 
@@ -49,10 +46,10 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
         {
             if (validKey == "name")
             {
-                if (innerMap["type"].toLower() != "bool")
+                if (innerMap["type"] != "bool")
                 {
                     this->_label = new QLabel(this->_widget);
-                    this->_label->setText(innerMap[validKey].toLower().trimmed() + " :");
+                    this->_label->setText(innerMap[validKey].trimmed() + " :");
                     this->_labelContainer.push_back(this->_label);
 
                     this->_hBoxLayout->addWidget(this->_label);
@@ -62,57 +59,53 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     checkBoxLabel = innerMap[validKey];
                 }
             }
-            else if (validKey == "default value")
-            {
-                defaultValue = innerMap[validKey].toLower().trimmed();
-            }
-            else if (validKey == "description")
-            {
-                description = innerMap[validKey];
-            }
             else if (validKey == "type")
             {
-                if (innerMap[validKey].toLower().trimmed() == "string")
+                if (innerMap[validKey].trimmed() == "string")
                 {
                     this->_lineEdit = new QLineEdit(this->_widget);
-                    this->_lineEdit->setPlaceholderText(description);
+                    this->_lineEdit->setPlaceholderText(innerMap["description"].trimmed());
+
+                    if ("" != innerMap["default value"])
+                        this->_lineEdit->setText(innerMap["default value"]);
+
                     this->_lineEditContainer.push_back(this->_lineEdit);
 
-                    if (innerMap["readonly"].toLower().trimmed() == "true")
+                    if (innerMap["readonly"].trimmed() == "true")
                         this->_lineEdit->setEnabled(false);
 
                     this->_hBoxLayout->addWidget(this->_lineEdit);
 
-                    this->addItemToHashTable(this->_itemPrecedence, "l", this->_lineEditIndex);
+                    this->addItemToHashTable(this->_itemPrecedence, "lineEdit", this->_lineEditIndex);
                     this->_lineEditIndex++;
                 }
-                else if (innerMap[validKey].toLower().trimmed() == "string list")
+                else if (innerMap[validKey].trimmed() == "string list")
                 {
                     this->_comboBox = new QComboBox(this->_widget);
 
                     QString comboBoxValues_str = innerMap["string list values"];
                     QStringList comboBoxValues_list = comboBoxValues_str.split(u' ', Qt::KeepEmptyParts);
                     this->_comboBox->addItems(comboBoxValues_list);
-                    this->_comboBox->setCurrentText(defaultValue);
+                    this->_comboBox->setCurrentText(innerMap["default value"].trimmed());
 
-                    if (innerMap["readonly"].toLower().trimmed() == "false" or !innerMap.contains("readonly"))
+                    if (innerMap["readonly"].trimmed() == "false" or !innerMap.contains("readonly"))
                         this->_comboBox->setEnabled(true);
-                    else if (innerMap["readonly"].toLower().trimmed() == "true")
+                    else if (innerMap["readonly"].trimmed() == "true")
                         this->_comboBox->setEnabled(false);
 
                     this->_comboBoxContainer.push_back(this->_comboBox);
                     this->_hBoxLayout->addWidget(this->_comboBox);
 
-                    this->addItemToHashTable(this->_itemPrecedence, "C", this->_comboBoxIndex);
+                    this->addItemToHashTable(this->_itemPrecedence, "comboBox", this->_comboBoxIndex);
                     this->_comboBoxIndex++;
                 }
-                else if (innerMap[validKey].toLower().trimmed() == "bool")
+                else if (innerMap[validKey].trimmed() == "bool")
                 {
                     this->_checkBox = new QCheckBox(this->_widget);
 
-                    if (defaultValue == "checked-true" or defaultValue.isEmpty())
+                    if (innerMap["default value"].trimmed() == "checked-true" or innerMap["default value"].trimmed().isEmpty())
                         this->_checkBox->setChecked(true);
-                    else if (defaultValue == "checked-false")
+                    else if (innerMap["default value"].trimmed() == "checked-false")
                         this->_checkBox->setChecked(false);
 
                     if (innerMap["readonly"] == "true")
@@ -125,13 +118,13 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     this->_hBoxLayout->addWidget(this->_checkBox);
 
-                    this->addItemToHashTable(this->_itemPrecedence, "c", this->_checkBoxIndex);
+                    this->addItemToHashTable(this->_itemPrecedence, "checkBox", this->_checkBoxIndex);
                     this->_checkBoxIndex++;
                 }
-                else if (innerMap[validKey].toLower().trimmed() == "file")
+                else if (innerMap[validKey].trimmed() == "file")
                 {
                     this->_lineEdit = new QLineEdit(this->_widget);
-                    this->_lineEdit->setPlaceholderText(description);
+                    this->_lineEdit->setPlaceholderText(innerMap["description"].trimmed());
 
                     this->_pushButton = new QPushButton(this->_widget);
                     this->_pushButton->setText("Browse");
@@ -155,59 +148,54 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
                     this->_hBoxLayout->addWidget(this->_lineEdit);
                     this->_hBoxLayout->addWidget(this->_pushButton);
 
-                    this->addItemToHashTable(this->_itemPrecedence, "f", this->_fileIndex);
-                    this->_fileIndex++;
+                    this->addItemToHashTable(this->_itemPrecedence, "file", this->_lineEditIndex);
+                    this->_lineEditIndex++;
                 }
-                else if (innerMap[validKey].toLower().trimmed() == "number_i" or innerMap[validKey].toLower().trimmed() == "number_ui")
+                else if (innerMap[validKey].trimmed() == "number_i" or innerMap[validKey].trimmed() == "number_ui")
                 {
-                    if (!defaultValue.isEmpty())
+                    if (!innerMap["default value"].trimmed().isEmpty())
                     {
-                        if (!this->validInteger(defaultValue))
+                        if (!this->validInteger(innerMap["default value"].trimmed()))
                             throw std::invalid_argument("you should enter only number for default value (because the type is number)");
                     }
                     else
-                        defaultValue = "0";
+                        innerMap["default value"] = "0";
 
                     this->_regularSpinBox = new QSpinBox(this->_widget);
 
-                    if (innerMap["readonly"].toLower() == "true")
+                    if (innerMap["readonly"] == "true")
                         this->_regularSpinBox->setEnabled(false);
 
                     int32_t maxInt = static_cast<int>(std::numeric_limits<int>::max());
                     int32_t minInt = static_cast<int>(std::numeric_limits<int>::min());
-                    int32_t value = defaultValue.toInt();
-                    if (innerMap[validKey].toLower().trimmed() == "number_i")
-                    {
+                    int32_t value = innerMap["default value"].trimmed().toInt();
+                    if (innerMap[validKey].trimmed() == "number_i")
                         this->_regularSpinBox->setRange(minInt, maxInt);
-
-                        this->addItemToHashTable(this->_itemPrecedence, "s", this->_signedRegularSpinBoxIndex);
-                        this->_signedRegularSpinBoxIndex++;
-                    }
-                    else if (innerMap[validKey].toLower().trimmed() == "number_ui")
+                    else if (innerMap[validKey].trimmed() == "number_ui")
                     {
                         if (value < 0)
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_ui");
 
                         this->_regularSpinBox->setRange(0, maxInt);
-
-                        this->addItemToHashTable(this->_itemPrecedence, "us", this->_unsignedRegularSpinBoxIndex);
-                        this->_unsignedRegularSpinBoxIndex++;
                     }
 
                     this->_regularSpinBox->setValue(value);
                     this->_regularSpinBoxContainer.push_back(this->_regularSpinBox);
 
                     this->_hBoxLayout->addWidget(this->_regularSpinBox);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "integer spinBox", this->_regularSpinBoxIndex);
+                    this->_regularSpinBoxIndex++;
                 }
-                else if (innerMap[validKey].toLower().trimmed() == "number_f" or innerMap[validKey].toLower().trimmed() == "number_uf")
+                else if (innerMap[validKey].trimmed() == "number_f" or innerMap[validKey].trimmed() == "number_uf")
                 {
-                    if (!defaultValue.isEmpty())
+                    if (!innerMap["default value"].trimmed().isEmpty())
                     {
-                        if (!this->validDouble(defaultValue))
+                        if (!this->validDouble(innerMap["default value"].trimmed()))
                             throw std::invalid_argument("you should enter only number for default value (because the type is number)");
                     }
                     else
-                        defaultValue = "0.0";
+                        innerMap["default value"].trimmed() = "0.0";
 
                     this->_doubleSpinBox = new QDoubleSpinBox(this->_widget);
 
@@ -216,29 +204,24 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
 
                     double minDouble = static_cast<float>(std::numeric_limits<int>::min());
                     double maxDouble = std::numeric_limits<float>::max();
-                    double value = defaultValue.toDouble();
-                    if (innerMap[validKey].toLower().trimmed() == "number_f")
-                    {
+                    double value = innerMap["default value"].trimmed().toDouble();
+                    if (innerMap[validKey].trimmed() == "number_f")
                         this->_doubleSpinBox->setRange(minDouble, maxDouble);
-
-                        this->addItemToHashTable(this->_itemPrecedence, "S", this->_signedDoubleSpinIndex);
-                        this->_signedDoubleSpinIndex++;
-                    }
-                    else if (innerMap[validKey].toLower().trimmed() == "number_uf")
+                    else if (innerMap[validKey].trimmed() == "number_uf")
                     {
                         if (value < 0)
                             throw std::invalid_argument("you should enter only non-negative numbers because the type is number_uf");
 
                         this->_doubleSpinBox->setRange(0.0f, maxDouble);
-
-                        this->addItemToHashTable(this->_itemPrecedence, "uS", this->_unsignedDoubleSpinIndex);
-                        this->_unsignedDoubleSpinIndex++;
                     }
 
                     this->_doubleSpinBox->setValue(value);
                     this->_doubleSpinBoxContainer.push_back(this->_doubleSpinBox);
 
                     this->_hBoxLayout->addWidget(this->_doubleSpinBox);
+
+                    this->addItemToHashTable(this->_itemPrecedence, "float spinBox", this->_doubleSpinIndex);
+                    this->_doubleSpinIndex++;
                 }
             }
         }
@@ -255,7 +238,6 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
             this->_vBoxLayout->addWidget(this->_splitterLine);
         }
 
-        defaultValue = "";
         checkBoxLabel = "";
 
         ++counter;
@@ -280,16 +262,17 @@ void Arad::GeneratingForm::AradStyleFormGenerator::setupForm()
     this->_vBoxLayout->addLayout(this->_hBoxLayout);
 
     /// @brief cancel button pushed
-    QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 2], &QPushButton::clicked, this, [this]{
+    QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 2], &QPushButton::clicked, [this]{
         this->_widget->close();
     });
 
     /// @brief save button pushed
     QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 1], &QPushButton::clicked, [this]{
-        QFileDialog *fileDialog = new QFileDialog;
-        QString filePath = fileDialog->getSaveFileName();
-        QVector<QMap<QString, QString>> tempMap = this->_jsonParser->parseJson();
-//        Arad::JsonGeneratorNP::JsonGenerator *jsonGenerator = new Arad::JsonGeneratorNP::AradStyleJsonGenerator(filePath);
+        this->slot_saveButtonPressed();
+    });
+
+    QObject::connect(this->_pushButtonContainer[this->_pushButtonContainer.size() - 2], &QPushButton::clicked, [this]{
+       this->~AradStyleFormGenerator();
     });
 
     this->_widget->show();
@@ -304,23 +287,6 @@ void Arad::GeneratingForm::AradStyleFormGenerator::generatedFormSizeFixer() noex
 void Arad::GeneratingForm::AradStyleFormGenerator::addItemToHashTable(int32_t itemPrecednece, QString const& itemType, int32_t indexOfItem)
 {
     this->_hashTable.push_back({QString::number(itemPrecednece), itemType, QString::number(indexOfItem)});
-}
-
-void Arad::GeneratingForm::AradStyleFormGenerator::JsonGenerator() const noexcept
-{
-    QVector<QMap<QString, QString>> tempVector;
-    tempVector = this->_jsonParser->parseJson();
-
-    int32_t counter = 0;
-    for (auto innerMap : tempVector)
-    {
-        for (auto mapItem : innerMap)
-        {
-            ;
-        }
-
-        counter++;
-    }
 }
 
 Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
@@ -422,6 +388,59 @@ void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked(
         {
             this->_browsingInFileSystem->treeView->collapse(currentIndex);
         }
+    }
+}
+
+void Arad::GeneratingForm::AradStyleFormGenerator::slot_saveButtonPressed()
+{
+    QFileDialog *fileDialog = new QFileDialog;
+    QString filePath;
+    if ((filePath = fileDialog->getSaveFileName()) != "")
+    {
+        QVector<QHash<QString, QString>> tempContainer = this->_jsonParser->parseJson();
+        QVector<QString> validKeys = this->_jsonParser->getValidKeys();
+        for (int precedence = 0; precedence < tempContainer.size(); precedence++)
+        {
+            QHash<QString, QString> &innerMap = tempContainer[precedence];
+
+            if ("lineEdit" == this->_hashTable[precedence][1])
+            {
+                if ("" != this->_lineEditContainer[this->_hashTable[precedence][2].toUInt()]->text())
+                    innerMap["default value"] = \
+                            this->_lineEditContainer[this->_hashTable[precedence][2].toUInt()]->text();
+            }
+            else if ("checkBox" == this->_hashTable[precedence][1])
+            {
+                innerMap["default value"] = \
+                        this->_checkBoxContainer[this->_hashTable[precedence][2].toUInt()]->isChecked() ? "true" : "false";
+            }
+            else if ("comboBox" == this->_hashTable[precedence][1])
+            {
+                innerMap["default value"] = \
+                        this->_comboBoxContainer[this->_hashTable[precedence][2].toUInt()]->currentText();
+            }
+            else if ("integer spinBox" == this->_hashTable[precedence][1] or "unsigned int spinBox" == this->_hashTable[precedence][1])
+            {
+                innerMap["default value"] = \
+                        this->_regularSpinBoxContainer[this->_hashTable[precedence][2].toUInt()]->text();
+            }
+            else if ("float spinBox" == this->_hashTable[precedence][1] or "unsigned float spinBox" == this->_hashTable[precedence][1])
+            {
+                innerMap["default value"] = \
+                        this->_doubleSpinBoxContainer[this->_hashTable[precedence][2].toUInt()]->text();
+            }
+            else if ("file" == this->_hashTable[precedence][1])
+            {
+                if ("" != this->_lineEditContainer[this->_hashTable[precedence][2].toUInt()]->text())
+                    innerMap["default value"] = \
+                        this->_lineEditContainer[this->_hashTable[precedence][2].toUInt()]->text();
+            }
+        }
+
+        Arad::JsonGeneratorNP::JsonGenerator *jsonGenerator = \
+                new Arad::JsonGeneratorNP::AradStyleJsonGenerator;
+
+        (*jsonGenerator)(tempContainer, filePath/*, orderedKeys*/);
     }
 }
 

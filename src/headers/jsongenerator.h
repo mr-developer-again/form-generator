@@ -2,7 +2,7 @@
 #define ARAD_JSONGENERATOR_H
 
 #include <QVector>
-#include <QMap>
+#include <QHash>
 #include <QString>
 
 namespace Arad
@@ -24,9 +24,9 @@ namespace Arad
             JsonGenerator() = default;
             virtual ~JsonGenerator() = default;
 
-            virtual void operator()(QVector<QMap<QString, QString>> const& container,
-                                    QVector<QString> const& orderedKeys,
-                                    QString const& filePath) = 0;
+            virtual void operator()(QVector<QHash<QString, QString>> const& container,
+                                    QString const& filePath,
+                                    QVector<QString> const& orderedKeys = QVector<QString> {}) = 0;
         };
 
     }

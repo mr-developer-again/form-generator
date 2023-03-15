@@ -6,6 +6,7 @@
 #include <QMessageBox>
 
 #include <algorithm>
+#include <memory>
 
 int main(int argc, char *argv[])
 {
@@ -13,11 +14,10 @@ int main(int argc, char *argv[])
 
     QString filePath = "/home/arad/projects/projects2/qt_projects/form-generator/src/sample.json";
 
-    Arad::GeneratingForm::FormGenerator *formGenerator = nullptr;
-
+    std::unique_ptr<Arad::GeneratingForm::FormGenerator> formGenerator;
     try
     {
-        formGenerator = new Arad::GeneratingForm::AradStyleFormGenerator(filePath);
+        formGenerator = std::make_unique<Arad::GeneratingForm::AradStyleFormGenerator>(filePath);
         formGenerator->darkTheme();
         formGenerator->setupForm();
     }

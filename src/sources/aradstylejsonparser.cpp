@@ -7,20 +7,20 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-Arad::Parser::AradStyleJsonParser::AradStyleJsonParser(QString const& filePath, QStringList const& validKeys)
+Arad::Parser::AradStyleJsonParser::AradStyleJsonParser(QString const& filePath, QVector<QString> const& validKeys)
     : Arad::Parser::JsonParser(filePath, validKeys)
 {
     if (!this->fileCanBeOpened(filePath))
         throw std::runtime_error("the file couldn't be open");
 }
 
-QVector<QMap<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
+QVector<QHash<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
 {
     QString filePath = this->getFilePath();
-    QStringList validKeys = this->getValidKeys();
+    QVector<QString> validKeys = this->getValidKeys();
 
-    QMap<QString, QString> tempMap;
-    QVector<QMap<QString, QString>> result;
+    QHash<QString, QString> tempMap;
+    QVector<QHash<QString, QString>> result;
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly))
@@ -83,7 +83,7 @@ QVector<QMap<QString, QString>> Arad::Parser::AradStyleJsonParser::parseJson()
     return result;
 }
 
-bool Arad::Parser::AradStyleJsonParser::jsonIsCorrect(QMap<QString, QString> const& inputMap, QString &error)
+bool Arad::Parser::AradStyleJsonParser::jsonIsCorrect(QHash<QString, QString> const& inputMap, QString &error)
 {
     if (inputMap["name"] == "" or inputMap["type"] == "")
     {

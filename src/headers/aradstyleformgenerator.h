@@ -74,7 +74,6 @@ namespace Arad
 
         protected:
             void generatedFormSizeFixer() noexcept;
-            void JsonGenerator() const noexcept;
 
         private:
             QHBoxLayout *_hBoxLayout = nullptr;
@@ -115,31 +114,25 @@ namespace Arad
 
             /// @brief the following vector stores a hash table
             ///        about items (priority of items)
-            /// @details the hash table stores items in the following style
-            ///             l  -> Line Edit
-            ///             c  -> Check Box
-            ///             C  -> Combo Box
-            ///             s  -> Spin Box (signed integer spin box)
-            ///             us -> Spin Box (unsigned interger spin box)
-            ///             S  -> Spin Box (signed double spin box)
-            ///             uS -> Spin Box (unsigned double spin box)
-            ///             f  -> file
+            /// @details the hash table stores items in the following style (the following keys are used
+            ///          for storing data in hash table)
+            ///             lineEdit
+            ///             checkBox
+            ///             comboBox
+            ///             int spinBox
+            ///             float spinBox
+            ///             file
             QVector<QVector<QString>> _hashTable;
 
             int32_t _itemPrecedence = 0;
 
             /// @brief by the following variables, we want to keep index of
             ///        item inside related container (to access the item)
-            int32_t _pushButtonIndex = 0;
-            int32_t _labelIndex = 0;
             int32_t _lineEditIndex = 0;
-            int32_t _signedRegularSpinBoxIndex = 0;
-            int32_t _unsignedRegularSpinBoxIndex = 0;
-            int32_t _signedDoubleSpinIndex = 0;
-            int32_t _unsignedDoubleSpinIndex = 0;
+            int32_t _regularSpinBoxIndex = 0;
+            int32_t _doubleSpinIndex = 0;
             int32_t _checkBoxIndex = 0;
             int32_t _comboBoxIndex = 0;
-            int32_t _fileIndex = 0;
 
             void addItemToHashTable(int32_t itemPrecednece, QString const& itemType, int32_t indexOfItem);
 
@@ -147,6 +140,7 @@ namespace Arad
             void slot_browsePushButtonClicked();
             void slot_treeViewDoubleClicked(QModelIndex index);
             void slot_selectPushButtonClicked();
+            void slot_saveButtonPressed();
 
         };
 

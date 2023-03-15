@@ -4,8 +4,8 @@
 #include <headers/jsonparser.h>
 
 #include <QVector>
-#include <QMap>
-#include <QStringList>
+#include <QHash>
+#include <QString>
 
 namespace Arad
 {
@@ -17,14 +17,14 @@ namespace Arad
         {
         public:
             explicit AradStyleJsonParser(QString const& filePath,
-                                        QStringList const& validKeys =
+                                        QVector<QString> const& validKeys =
                                         {"name", "default value", "string list values", "description", "type", "readonly"});
 
-            QVector<QMap<QString, QString>> parseJson() override;
+            QVector<QHash<QString, QString>> parseJson() override;
 
         private:
             /// this method checks correctness of the json file
-            bool jsonIsCorrect(QMap<QString, QString> const& inputMap, QString& error);
+            bool jsonIsCorrect(QHash<QString, QString> const& inputMap, QString& error);
         };
 
     } // Parser namespace

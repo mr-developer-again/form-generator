@@ -1,10 +1,8 @@
 #ifndef ARAD_PARSER_JSONPARSER_JSONPARSER_H
 #define ARAD_PARSER_JSONPARSER_JSONPARSER_H
 
-#include <QStringList>
-#include <QString>
 #include <QVector>
-#include <QMap>
+#include <QHash>
 
 namespace Arad
 {
@@ -15,15 +13,15 @@ namespace Arad
         class JsonParser
         {
         public:
-            JsonParser(QString const& filePath, QStringList const& validKeys);
+            JsonParser(QString const& filePath, QVector<QString> const& validKeys);
             virtual ~JsonParser() = default;
 
-            virtual QVector<QMap<QString, QString>> parseJson() = 0;
+            virtual QVector<QHash<QString, QString>> parseJson() = 0;
 
             static bool fileCanBeOpened(QString const& filePath) noexcept;
 
-            void setValidKeys(QStringList const& validKeys);
-            QStringList getValidKeys() const;
+            void setValidKeys(QVector<QString> const& validKeys);
+            QVector<QString> getValidKeys() const;
 
         protected:
             void setFilePath(QString const& filePath);
@@ -31,7 +29,7 @@ namespace Arad
 
         private:
             QString _filePath;
-            QStringList _validKeys;
+            QVector<QString> _validKeys;
 
         };
 

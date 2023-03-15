@@ -7,7 +7,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-Arad::Parser::JsonParser::JsonParser(QString const& filePath, QStringList const& validKeys)
+Arad::Parser::JsonParser::JsonParser(QString const& filePath, QVector<QString> const& validKeys)
     : _filePath(filePath),
       _validKeys(validKeys)
 { /* constructor body */ }
@@ -29,8 +29,8 @@ void Arad::Parser::JsonParser::setFilePath(QString const& filePath)
 QString Arad::Parser::JsonParser::getFilePath() const
 { return this->_filePath; }
 
-void Arad::Parser::JsonParser::setValidKeys(QStringList const& validKeys)
+void Arad::Parser::JsonParser::setValidKeys(QVector<QString> const& validKeys)
 { this->_validKeys = validKeys; }
 
-QStringList Arad::Parser::JsonParser::getValidKeys() const
+QVector<QString> Arad::Parser::JsonParser::getValidKeys() const
 { return this->_validKeys; }
