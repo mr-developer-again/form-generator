@@ -63,7 +63,9 @@ void Arad::JsonGeneratorNP::AradStyleJsonGenerator::operator()(QVector<QHash<QSt
             objectRecord = new QJsonObject;
             for (auto const& key : listOfKeys)
             {
-                if ("string list" == innerMap["type"] and stringListPermitted)
+                if ("string list" == innerMap["type"] and
+                        stringListPermitted and
+                        "string list values" == key)
                 {
                     QString value = innerMap["string list values"];
                     QStringList listOfValues = value.split(' ', Qt::KeepEmptyParts);
