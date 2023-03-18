@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QString filePath = "/home/arad/projects/projects2/qt_projects/form-generator/src/sample.json";
+    QString filePath = "/home/arad/projects/projects3/qt_projects/form-generator/src/sample.json";
 
     std::unique_ptr<Arad::GeneratingForm::FormGenerator> formGenerator;
     try

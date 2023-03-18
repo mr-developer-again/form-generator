@@ -38,18 +38,6 @@ namespace Arad
         {
             Q_OBJECT
 
-            struct BrowsingInFileSystem final
-            {
-                QDialog *dialog = new QDialog;
-                QFileSystemModel *fileSystemModel = nullptr;
-                QTreeView *treeView = nullptr;
-                QHBoxLayout *hBoxLayout = new QHBoxLayout;
-                QVBoxLayout *vBoxLayout = new QVBoxLayout(dialog);
-                QPushButton *selectPushButton = new QPushButton(dialog);
-                QSpacerItem *spacerItem;
-                QString pathOfSelectedFile = "";
-            };
-
             struct ThemesSwitchButton final : public QObject
             {
                 ThemesSwitchButton() = default;
@@ -108,8 +96,6 @@ namespace Arad
             QSpacerItem *_spacerItem = nullptr;
             QVector<QSpacerItem*> _spacerItemContainer;
 
-            BrowsingInFileSystem *_browsingInFileSystem = nullptr;
-
             ThemesSwitchButton _themesSwitchButton;
 
             /// @brief the following vector stores a hash table
@@ -138,8 +124,6 @@ namespace Arad
 
         private slots:
             void slot_browsePushButtonClicked();
-            void slot_treeViewDoubleClicked(QModelIndex index);
-            void slot_selectPushButtonClicked();
             void slot_saveButtonPressed();
 
         };

@@ -13,6 +13,8 @@
 #include <QTextStream>
 #include <QAbstractButton>
 #include <QList>
+#include <QFileDialog>
+#include <QString>
 
 #include <stdexcept>
 
@@ -298,7 +300,6 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
     delete this->_vBoxLayout;
     delete this->_regularSpinBox;
     delete this->_doubleSpinBox;
-    delete this->_browsingInFileSystem;
     delete this->_spacerItem;
 
     for (auto label : this->_labelContainer)
@@ -322,80 +323,18 @@ Arad::GeneratingForm::AradStyleFormGenerator::~AradStyleFormGenerator()
 
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_browsePushButtonClicked()
 {
-    this->_browsingInFileSystem = new Arad::GeneratingForm::AradStyleFormGenerator::BrowsingInFileSystem;
+    QFileDialog *fileDialog = new QFileDialog;
 
-    this->_browsingInFileSystem->dialog->setFixedSize(600, 400);
-
-    this->_browsingInFileSystem->selectPushButton->setText("select");
-    this->_browsingInFileSystem->selectPushButton->setEnabled(true);
-
-    this->_browsingInFileSystem->spacerItem = new QSpacerItem(400, 20);
-
-    this->_browsingInFileSystem->fileSystemModel = new QFileSystemModel(this->_browsingInFileSystem->dialog);
-    this->_browsingInFileSystem->fileSystemModel->setReadOnly(true);
-    this->_browsingInFileSystem->fileSystemModel->setRootPath(QDir::homePath());
-    QModelIndex rootPathIndex = this->_browsingInFileSystem->fileSystemModel->index(QDir::homePath());
-
-    this->_browsingInFileSystem->treeView = new QTreeView(this->_browsingInFileSystem->dialog);
-    this->_browsingInFileSystem->treeView->setModel(this->_browsingInFileSystem->fileSystemModel);
-    this->_browsingInFileSystem->treeView->expand(rootPathIndex);
-    this->_browsingInFileSystem->treeView->scrollTo(rootPathIndex);
-    this->_browsingInFileSystem->treeView->setCurrentIndex(rootPathIndex);
-    this->_browsingInFileSystem->treeView->resizeColumnToContents(0);
-
-    QObject::connect(this->_browsingInFileSystem->treeView, SIGNAL(doubleClicked(QModelIndex)), this,
-                     SLOT(slot_treeViewDoubleClicked(QModelIndex)));
-
-    QObject::connect(this->_browsingInFileSystem->selectPushButton, SIGNAL(clicked()), this,
-                     SLOT(slot_selectPushButtonClicked()));
-
-    this->_browsingInFileSystem->hBoxLayout->addWidget(this->_browsingInFileSystem->selectPushButton);
-    this->_browsingInFileSystem->hBoxLayout->addItem(this->_browsingInFileSystem->spacerItem);
-    this->_browsingInFileSystem->vBoxLayout->addWidget(this->_browsingInFileSystem->treeView);
-    this->_browsingInFileSystem->vBoxLayout->addLayout(this->_browsingInFileSystem->hBoxLayout);
-
-    this->_browsingInFileSystem->dialog->show();
-    this->_browsingInFileSystem->dialog->exec();
-}
-
-void Arad::GeneratingForm::AradStyleFormGenerator::slot_treeViewDoubleClicked(QModelIndex index)
-{
-    if (this->_browsingInFileSystem->fileSystemModel->fileInfo(index).isFile())
-    {
-        this->_browsingInFileSystem->pathOfSelectedFile = \
-                this->_browsingInFileSystem->fileSystemModel->fileInfo(index).absoluteFilePath();
-
-        this->_lineEdit->setText(this->_browsingInFileSystem->pathOfSelectedFile);
-
-        this->_browsingInFileSystem->dialog->close();
-    }
-}
-
-void Arad::GeneratingForm::AradStyleFormGenerator::slot_selectPushButtonClicked()
-{
-    QModelIndex currentIndex = this->_browsingInFileSystem->treeView->currentIndex();
-
-    if (this->_browsingInFileSystem->fileSystemModel->fileInfo(currentIndex).isFile())
-        emit this->_browsingInFileSystem->treeView->doubleClicked(currentIndex);
-    else if (this->_browsingInFileSystem->fileSystemModel->fileInfo(currentIndex).isDir())
-    {
-        if (!this->_browsingInFileSystem->treeView->isExpanded(currentIndex))
-        {
-            this->_browsingInFileSystem->treeView->expand(currentIndex);
-            this->_browsingInFileSystem->treeView->scrollTo(currentIndex);
-        }
-        else
-        {
-            this->_browsingInFileSystem->treeView->collapse(currentIndex);
-        }
-    }
+    QString filePath;
+    if ((filePath = fileDialog->getOpenFileName(nullptr, QString(), QDir::homePath())) != "")
+        this->_lineEdit->setText(filePath);
 }
 
 void Arad::GeneratingForm::AradStyleFormGenerator::slot_saveButtonPressed()
 {
     QFileDialog *fileDialog = new QFileDialog;
     QString filePath;
-    if ((filePath = fileDialog->getSaveFileName()) != "")
+    if ((filePath = fileDialog->getSaveFileName(nullptr, QString(), QDir::homePath())) != "")
     {
         QVector<QHash<QString, QString>> tempContainer = this->_jsonParser->parseJson();
         QVector<QString> validKeys = this->_jsonParser->getValidKeys();
