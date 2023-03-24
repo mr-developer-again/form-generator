@@ -1,5 +1,5 @@
-#ifndef ARAD_JSONGENERATOR_H
-#define ARAD_JSONGENERATOR_H
+#ifndef ARAD_JSONGENERATORNP_JSONGENERATOR_H
+#define ARAD_JSONGENERATORNP_JSONGENERATOR_H
 
 #include <QVector>
 #include <QHash>
@@ -33,4 +33,4 @@ namespace Arad
 
 } // namespace Arad
 
-#endif  // ARAD_JSONGENERATOR_H
+#endif  // ARAD_JSONGENERATORNP_JSONGENERATOR_H

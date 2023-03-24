@@ -1,38 +1,42 @@
 #include <headers/formgenerator.h>
 
+#include <QWidget>
+#include <QString>
 #include <QFile>
 #include <QTextStream>
+
 #include <stdexcept>
 
-Arad::GeneratingForm::FormGenerator::FormGenerator(QString const& filePath, QWidget *parent)
+Arad::GeneratingForm::FormGenerator::FormGenerator(QString const& filePath)
 {
-    this->_widget = new QWidget(parent);
+    this->_widget.reset(new QWidget);
+    this->_widget->setAttribute(Qt::WA_DeleteOnClose);
     Arad::GeneratingForm::FormGenerator::setFilePath(filePath);
 }
 
 void Arad::GeneratingForm::FormGenerator::darkTheme()
 {
-    QFile file("/home/arad/osg_installation/sample-gis/plugins/sample-plugin/res/themes/qdarkstyle/theme/darkstyle.qss");
+    // QFile file(":/themes/qdarkstyle/theme/darkstyle.qss");
 
-    if (!file.exists())
-        throw std::runtime_error("file not found\n"
-                                 "-> error in finding theme file\n"
-                                 "   (fix theme file's path in \"src/fromgenerator.cpp\" file or\n"
-                                 "   comment \"formGenerator->darkTheme();\" in \"src/sample.cpp\" file)\n"
-                                 );
+    // if (!file.exists())
+    //     throw std::runtime_error("file not found\n"
+    //                              "-> error in finding theme file\n"
+    //                              "   (fix theme file's path in \"src/fromgenerator.cpp\" file or\n"
+    //                              "   comment \"formGenerator->darkTheme();\" in \"src/sample.cpp\" file)\n"
+    //                              );
 
-    if (!file.open(QFile::ReadOnly | QFile::Text))
-        throw std::runtime_error("couldn't open theme file");
+    // if (!file.open(QFile::ReadOnly | QFile::Text))
+    //     throw std::runtime_error("couldn't open theme file");
 
-    QTextStream textStream(&file);
-    this->_widget->setStyleSheet(textStream.readAll());
+    // QTextStream textStream(&file);
+    // this->_widget->setStyleSheet(textStream.readAll());
 }
 
 void Arad::GeneratingForm::FormGenerator::toggleTheme(QString const& themeName)
 {
     if ("default" == themeName)
         this->_widget->setStyleSheet("");
-    else if ("dark" == themeName.trimmed().toLower())
+    else if (themeName.trimmed().toLower() == "dark")
         this->darkTheme();
 }
 
@@ -53,7 +57,7 @@ bool Arad::GeneratingForm::FormGenerator::validInteger(QString const& inputStrin
 {
     for (uint32_t i = 0; i < inputString.size(); ++i)
     {
-        if (!(inputString[i].isDigit() or inputString[i] == '-')) /// returns false if the QChar is not digit or negative-sign (-)
+        if (!(inputString[i].isDigit() or (inputString[i] == '-'))) /// returns false if the QChar is not digit or negative-sign (-)
             return false;
 
         if ((inputString[i] == '-') and (i != 0)) /// returns false if negative-sign has been located
@@ -84,9 +88,6 @@ bool Arad::GeneratingForm::FormGenerator::validDouble(QString const& inputString
 
 Arad::GeneratingForm::FormGenerator::~FormGenerator()
 {
-    delete this->_jsonParser;
-    delete this->_widget;
-
     //////////////// TESTING ////////////////////
     QTextStream out(stdout);
     out << "FORM GENERATOR DESCTURCTOR" << Qt::endl;

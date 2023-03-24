@@ -8,25 +8,29 @@
 #include <QStringList>
 
 #include <stdexcept>
+#include <memory>
+#include <functional>
 
 void Arad::JsonGeneratorNP::AradStyleJsonGenerator::operator()(QVector<QHash<QString, QString>> const& container,
                                                                QString const& filePath,
                                                                QVector<QString> const& orderedKeys)
 {
-    QFile file(filePath);
-    if (!file.open(QFile::WriteOnly))
+    std::unique_ptr<QFile, std::function<void(QFile*)>> file(new QFile(filePath), [](QFile* file) -> void {
+        file->close();
+    });
+    if (!file->open(QFile::WriteOnly))
         throw std::runtime_error("couldn't open the file for writing the json information");
 
     bool anyOrder = orderedKeys.empty() ? true : false;
-    QJsonObject *objectRecord;
-    QJsonArray *arrayRecord = new QJsonArray;
+    std::unique_ptr<QJsonObject> objectRecord;
+    std::unique_ptr<QJsonArray> arrayRecord = std::make_unique<QJsonArray>();
     bool stringListPermitted = true;
     if (!anyOrder)
     {
         size_t index = 0;
         while (1)
         {
-            objectRecord = new QJsonObject;
+            objectRecord = std::make_unique<QJsonObject>();
             for (auto const& key : orderedKeys)
             {
                 if (container[index][key] == "")
@@ -47,7 +51,7 @@ void Arad::JsonGeneratorNP::AradStyleJsonGenerator::operator()(QVector<QHash<QSt
                 else if ("string list values" != key)
                     objectRecord->insert(key, container[index][key]);
             }
-            arrayRecord->push_back(*objectRecord);
+            arrayRecord->push_back(std::move(*objectRecord));
             stringListPermitted = true;
 
             ++index;
@@ -60,7 +64,7 @@ void Arad::JsonGeneratorNP::AradStyleJsonGenerator::operator()(QVector<QHash<QSt
         for (auto const& innerMap : container)
         {
             QStringList listOfKeys = innerMap.keys();
-            objectRecord = new QJsonObject;
+            objectRecord = std::make_unique<QJsonObject>();
             for (auto const& key : listOfKeys)
             {
                 if ("string list" == innerMap["type"] and
@@ -78,16 +82,14 @@ void Arad::JsonGeneratorNP::AradStyleJsonGenerator::operator()(QVector<QHash<QSt
                 else if ("string list values" != key)
                     objectRecord->insert(key, innerMap[key]);
             }
-            arrayRecord->push_back(*objectRecord);
+            arrayRecord->push_back(std::move(*objectRecord));
             stringListPermitted = true;
         }
     }
 
-    QJsonDocument *jsonDocument = new QJsonDocument;
-    jsonDocument->setArray(*arrayRecord);
+    std::unique_ptr<QJsonDocument> jsonDocument = std::make_unique<QJsonDocument>();
+    jsonDocument->setArray(std::move(*arrayRecord));
 
-    QTextStream out(&file);
+    QTextStream out(file.get());
     out << jsonDocument->toJson();
-
-    file.close();
 }

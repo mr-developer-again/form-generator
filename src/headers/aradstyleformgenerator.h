@@ -1,13 +1,5 @@
-#ifndef ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_ARADSTYLEFORMGENERATOR_H
-#define ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_ARADSTYLEFORMGENERATOR_H
-
-namespace Arad
-{
-    namespace GeneratingForm
-    {
-        class SwitchButton;
-    }
-}
+#ifndef ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_H
+#define ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_H
 
 #include <headers/formgenerator.h>
 
@@ -28,31 +20,20 @@ namespace Arad
 #include <QStringList>
 #include <QSpacerItem>
 
+#include <QVector>
+#include <QScopedPointer>
+
+#include <functional>
+
 namespace Arad
 {
 
     namespace GeneratingForm
     {
 
-        class AradStyleFormGenerator : public Arad::GeneratingForm::FormGenerator
+        class AradStyleFormGenerator final : public Arad::GeneratingForm::FormGenerator
         {
             Q_OBJECT
-
-            struct ThemesSwitchButton final : public QObject
-            {
-                ThemesSwitchButton() = default;
-                ~ThemesSwitchButton();
-
-                QHBoxLayout* operator()(QWidget *widget = nullptr,
-                                        Arad::GeneratingForm::AradStyleFormGenerator *mainForm = nullptr);
-
-            private:
-                QHBoxLayout *_themeToggleHBoxLayout = nullptr;
-
-                QVector<QString> _themes { "default", "dark" };
-                int32_t _themeIndex = 0;
-                int32_t counter = 0;
-            };
 
         public:
             explicit AradStyleFormGenerator(QString const& filePath, QWidget* parent = nullptr);
@@ -60,43 +41,71 @@ namespace Arad
 
             void setupForm() override;
 
-        protected:
-            void generatedFormSizeFixer() noexcept;
-
         private:
-            QHBoxLayout *_hBoxLayout = nullptr;
-            QVector<QHBoxLayout*> _hBoxLayoutContainer;
+            void setFixedWidgetSize() noexcept;
 
-            QVBoxLayout *_vBoxLayout = nullptr;
+            std::unique_ptr<QHBoxLayout, std::function<void(QHBoxLayout*)>> _hBoxLayout = \
+                std::move(std::unique_ptr<QHBoxLayout, std::function<void(QHBoxLayout*)>>(nullptr, [](QHBoxLayout *layout) -> void {
+                    layout->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QHBoxLayout, std::function<void(QHBoxLayout*)>>> _hBoxLayoutContainer;
 
-            QLabel *_label = nullptr;
-            QVector<QLabel*> _labelContainer;
+            std::unique_ptr<QVBoxLayout, std::function<void(QVBoxLayout*)>> _vBoxLayout = \
+                std::move(std::unique_ptr<QVBoxLayout, std::function<void(QVBoxLayout*)>>(nullptr, [](QVBoxLayout* layout) -> void {
+                    layout->deleteLater();
+                }));
 
-            QLineEdit *_lineEdit = nullptr;
-            QVector<QLineEdit*> _lineEditContainer;
+            std::unique_ptr<QLabel, std::function<void(QLabel*)>> _label = \
+                std::move(std::unique_ptr<QLabel, std::function<void(QLabel*)>>(nullptr, [](QLabel* layout) -> void {
+                    layout->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QLabel, std::function<void(QLabel*)>>> _labelContainer;
 
-            QFrame *_splitterLine = nullptr;
-            QVector<QFrame*> _splitterLineContainer;
+            std::unique_ptr<QLineEdit, std::function<void(QLineEdit*)>> _lineEdit = \
+                std::move(std::unique_ptr<QLineEdit, std::function<void(QLineEdit*)>>(nullptr, [](QLineEdit *lineEdit) -> void
+                {
+                    lineEdit->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QLineEdit, std::function<void(QLineEdit*)>>> _lineEditContainer;
 
-            QSpinBox *_regularSpinBox = nullptr;
-            QVector<QSpinBox*> _regularSpinBoxContainer;
+            std::unique_ptr<QFrame, std::function<void(QFrame*)>> _splitterLine = \
+                std::move(std::unique_ptr<QFrame, std::function<void(QFrame*)>>(nullptr, [](QFrame* frame) -> void {
+                    frame->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QFrame, std::function<void(QFrame*)>>> _splitterLineContainer;
 
-            QDoubleSpinBox *_doubleSpinBox = nullptr;
-            QVector<QDoubleSpinBox*> _doubleSpinBoxContainer;
+            std::unique_ptr<QSpinBox, std::function<void(QSpinBox*)>> _regularSpinBox = \
+                std::move(std::unique_ptr<QSpinBox, std::function<void(QSpinBox*)>>(nullptr, [](QSpinBox *spinBox){
+                    spinBox->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QSpinBox, std::function<void(QSpinBox*)>>> _regularSpinBoxContainer;
 
-            QCheckBox *_checkBox = nullptr;
-            QVector<QCheckBox*> _checkBoxContainer;
+            std::unique_ptr<QDoubleSpinBox, std::function<void(QDoubleSpinBox*)>> _doubleSpinBox = \
+                std::move(std::unique_ptr<QDoubleSpinBox, std::function<void(QDoubleSpinBox*)>>(nullptr, [](QDoubleSpinBox *spinBox) -> void {
+                    spinBox->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QDoubleSpinBox, std::function<void(QDoubleSpinBox*)>>> _doubleSpinBoxContainer;
 
-            QPushButton *_pushButton = nullptr;
-            QVector<QPushButton*> _pushButtonContainer;
+            std::unique_ptr<QCheckBox, std::function<void(QCheckBox*)>> _checkBox = \
+                std::move(std::unique_ptr<QCheckBox, std::function<void(QCheckBox*)>>(nullptr, [](QCheckBox* checkBox) -> void {
+                    checkBox->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QCheckBox, std::function<void(QCheckBox*)>>> _checkBoxContainer;
 
-            QComboBox *_comboBox = nullptr;
-            QVector<QComboBox*> _comboBoxContainer;
+            std::unique_ptr<QPushButton, std::function<void(QPushButton*)>> _pushButton = \
+                std::move(std::unique_ptr<QPushButton, std::function<void(QPushButton*)>>(nullptr, [](QPushButton* pushButton) -> void {
+                    pushButton->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QPushButton, std::function<void(QPushButton*)>>> _pushButtonContainer;
 
-            QSpacerItem *_spacerItem = nullptr;
-            QVector<QSpacerItem*> _spacerItemContainer;
+            std::unique_ptr<QComboBox, std::function<void(QComboBox*)>> _comboBox = \
+                std::move(std::unique_ptr<QComboBox, std::function<void(QComboBox*)>>(nullptr, [](QComboBox* comboBox) -> void {
+                    comboBox->deleteLater();
+                }));
+            std::vector<std::unique_ptr<QComboBox, std::function<void(QComboBox*)>>> _comboBoxContainer;
 
-            ThemesSwitchButton _themesSwitchButton;
+            std::unique_ptr<QSpacerItem> _spacerItem;
+            std::vector<std::unique_ptr<QSpacerItem>> _spacerItemContainer;
 
             /// @brief the following vector stores a hash table
             ///        about items (priority of items)
@@ -132,4 +141,4 @@ namespace Arad
 
 } // Arad namespace
 
-#endif // ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_ARADSTYLEFORMGENERATOR_H
+#endif // ARAD_GENERATINGFORM_ARADSTYLEFORMGENERATOR_H

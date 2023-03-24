@@ -1,3 +1,6 @@
+#ifndef ARAD_JSONGENERATORNP_ARADSTYLEJSONGENERATOR_H
+#define ARAD_JSONGENERATORNP_ARADSTYLEJSONGENERATOR_H
+
 #include <headers/jsongenerator.h>
 
 #include <QVector>
@@ -31,3 +34,5 @@ namespace Arad
     } // namespace JsonGeneratorNP
 
 } // namespace Arad
+
+#endif  // ARAD_JSONGENERATORNP_ARADSTYLEJSONGENERATOR_H

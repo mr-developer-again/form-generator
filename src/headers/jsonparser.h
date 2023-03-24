@@ -1,5 +1,5 @@
-#ifndef ARAD_PARSER_JSONPARSER_JSONPARSER_H
-#define ARAD_PARSER_JSONPARSER_JSONPARSER_H
+#ifndef ARAD_PARSER_JSONPARSER_H
+#define ARAD_PARSER_JSONPARSER_H
 
 #include <QVector>
 #include <QHash>
@@ -37,4 +37,4 @@ namespace Arad
 
 } // Arad namespace
 
-#endif // ARAD_PARSER_JSONPARSER_JSONPARSER_H
+#endif // ARAD_PARSER_JSONPARSER_H

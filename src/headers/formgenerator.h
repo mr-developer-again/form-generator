@@ -1,11 +1,15 @@
-#ifndef ARAD_GENERATINGFORM_FORMGENERATOR_FORMGENERATOR_H
-#define ARAD_GENERATINGFORM_FORMGENERATOR_FORMGENERATOR_H
+#ifndef ARAD_GENERATINGFORM_FORMGENERATOR_H
+#define ARAD_GENERATINGFORM_FORMGENERATOR_H
 
 #include <headers/jsonparser.h>
 
-#include <QWidget>
-#include <QString>
 #include <QMainWindow>
+
+#include <memory>
+#include <functional>
+
+class QWidget;
+class QString;
 
 namespace Arad
 {
@@ -15,7 +19,7 @@ namespace Arad
         class FormGenerator : public QMainWindow
         {
         public:
-            explicit FormGenerator(QString const& filePath, QWidget *parent = nullptr);
+            explicit FormGenerator(QString const& filePath);
             virtual ~FormGenerator();
 
             virtual void setupForm() = 0;
@@ -34,8 +38,14 @@ namespace Arad
             virtual void setFilePath(QString const& filePath);
             virtual QString getFilePath() const noexcept;
 
-            QWidget* _widget = nullptr;
-            Arad::Parser::JsonParser *_jsonParser = nullptr;
+            /// @brief an unique-pointer to widget
+            std::unique_ptr<QWidget, std::function<void(QWidget*)>> _widget = \
+                std::move(std::unique_ptr<QWidget, std::function<void(QWidget*)>>(nullptr, [](QWidget* widget) -> void {
+                    widget->deleteLater();
+                }));
+
+            /// @brief an unique-pointer to json parser base-class (for polymorphic reasons)
+            std::unique_ptr<Arad::Parser::JsonParser> _jsonParser;
 
             virtual bool validInteger(QString const& inputString) const noexcept;
             virtual bool validDouble(QString const& inputString) const noexcept;
@@ -49,4 +59,4 @@ namespace Arad
 } // Arad namespace
 
 
-#endif // ARAD_GENERATINGFORM_FORMGENERATOR_FORMGENERATOR_H
+#endif // ARAD_GENERATINGFORM_FORMGENERATOR_H
