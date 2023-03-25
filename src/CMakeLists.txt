@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
 		"sources/jsongenerator.cpp"
 		"headers/aradstylejsongenerator.h"
 		"sources/aradstylejsongenerator.cpp"
+		"sources/getjsonpath.cpp"
+		"headers/getjsonpath.h"
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
